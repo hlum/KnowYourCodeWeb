@@ -2,7 +2,6 @@ import type { User } from "firebase/auth";
 import { useHomeViewModel } from "../hooks/useHomeViewModel";
 import { ClassItemView } from "../components/ClassItemView";
 import { HomeworkItemView } from "../components/HomeworkItemView";
-import { authManager } from "../firebase/authManager";
 
 interface HomeViewProps {
 	user: User;
@@ -48,10 +47,6 @@ function HomeSkeleton() {
 export function HomeView({ user }: HomeViewProps) {
 	const { userData, classes, homeworks, isLoading, error, refresh } = useHomeViewModel(user);
 
-	const handleLogout = async () => {
-		await authManager.signOut();
-	};
-
 	if (isLoading) {
 		return <HomeSkeleton />;
 	}
@@ -69,12 +64,6 @@ export function HomeView({ user }: HomeViewProps) {
 						<h1 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h1>
 					</div>
 					<div className="flex items-center gap-4">
-						<button
-							onClick={handleLogout}
-							className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-						>
-							ログアウト
-						</button>
 						{photoURL ? (
 							<img src={photoURL} alt="Profile" className="w-14 h-14 rounded-full border-2 border-white/50 shadow-lg object-cover" />
 						) : (

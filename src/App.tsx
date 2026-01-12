@@ -1,7 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import { LoginView } from './pages/LoginView';
 import { HomeView } from './pages/HomeView';
+import { ClassListView } from './pages/ClassListView';
+import { HomeworkListView } from './pages/HomeworkListView';
+import { ProfileView } from './pages/ProfileView';
 import { Loading } from './components/Loading';
+import { MainLayout } from './components/MainLayout';
 import { GuestRoute } from './router/GuestRoute';
 import { ProtectedRoute } from './router/ProtectedRoute';
 import { Paths } from './router/paths';
@@ -22,17 +26,57 @@ function App() {
           }
         />
 
-        {/* Home Page - Protected */}
+        {/* Protected Routes with Tab Navigation */}
         <Route
-          path={Paths.HOME}
           element={
             <ProtectedRoute>
-              {(user, authenticating) =>
-                authenticating ? <Loading /> : <HomeView user={user} />
+              {(_user, authenticating) =>
+                authenticating ? <Loading /> : <MainLayout />
               }
             </ProtectedRoute>
           }
-        />
+        >
+          <Route
+            path={Paths.HOME}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <HomeView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.CLASSES}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <ClassListView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.HOMEWORKS}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <HomeworkListView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.PROFILE}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <ProfileView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+        </Route>
       </Routes>
     </div>
   );
