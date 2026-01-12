@@ -16,7 +16,7 @@ import { Paths } from './router/paths';
 
 function App() {
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto min-h-screen app-bg">
       <Routes>
         {/* Login Page - Guest Only */}
         <Route

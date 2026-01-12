@@ -103,6 +103,22 @@
 	overflow: hidden;
 }
 
+/* Dark app background - extends beyond viewport */
+@utility app-bg {
+	background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 25%, #16213e 50%, #0f0f1a 100%);
+	background-attachment: fixed;
+}
+
+/* Hide scrollbar utility */
+@utility scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+	
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 /* Glassmorphism card for dark mode */
 @utility glass-card {
 	background: rgba(255, 255, 255, 0.05);

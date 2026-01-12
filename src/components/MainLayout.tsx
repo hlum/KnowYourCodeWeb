@@ -151,12 +151,12 @@ export function MainLayout() {
 				<Outlet />
 			</main>
 
-			{/* Bottom navigation - Liquid Glass Style */}
+			{/* Bottom navigation - Glass Style */}
 			<nav className="fixed bottom-4 left-4 right-4 z-50">
 				<div className="max-w-md mx-auto">
-					<div className="relative bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[28px] shadow-2xl shadow-black/30 overflow-visible">
+					<div className="relative bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[28px] shadow-2xl shadow-black/40 overflow-visible">
 						{/* Inner glass reflection */}
-						<div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-white/10 via-transparent to-black/10 pointer-events-none" />
+						<div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-white/15 via-white/5 to-transparent pointer-events-none" />
 						
 						{/* Liquid Glass Indicator */}
 						<LiquidGlassIndicator left={indicatorPos.left} width={indicatorPos.width} />
