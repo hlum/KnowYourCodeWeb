@@ -117,22 +117,12 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 		<div className="page-bg min-h-screen">
 			<div className="max-w-2xl mx-auto p-6">
 				{/* Header */}
-				<header className="flex items-center gap-4 mb-6">
-					{mode === 'review' && (
-						<button
-							onClick={() => navigate(getHomeworkDetailPath(homeworkId), { replace: true })}
-							className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-						>
-							<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-							</svg>
-						</button>
-					)}
+				<header className="flex items-center justify-between mb-6">
 					<h1 className="text-xl font-bold text-gray-900 dark:text-white">
 						{mode === 'answering' ? '質問一覧' : '回答履歴'}
 					</h1>
 					{mode === 'answering' && (
-						<span className="ml-auto text-gray-500 dark:text-gray-400">
+						<span className="text-gray-500 dark:text-gray-400">
 							{currentIndex + 1} / {questionsWithChoices.length}
 						</span>
 					)}

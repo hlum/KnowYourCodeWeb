@@ -65,16 +65,8 @@ export function ClassHomeworkListView({ user }: ClassHomeworkListViewProps) {
 	return (
 		<div className="page-bg min-h-screen">
 			<div className="max-w-6xl mx-auto p-6">
-				{/* Header with back button */}
-				<header className="flex items-center gap-4 mb-6">
-					<button
-						onClick={() => navigate(-1)}
-						className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-					>
-						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-						</svg>
-					</button>
+				{/* Header */}
+				<header className="mb-6">
 					<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
 						{isLoading ? "読み込み中..." : classInfo?.name || "科目"}
 					</h1>

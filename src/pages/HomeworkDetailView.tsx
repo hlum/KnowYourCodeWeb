@@ -37,7 +37,6 @@ function formatDueDate(dueDate: string | null | undefined): string {
 
 export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 	const { homeworkId } = useParams<{ homeworkId: string }>();
-	const navigate = useNavigate();
 
 	const {
 		homework,
@@ -89,15 +88,6 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 		return (
 			<div className="page-bg min-h-screen">
 				<div className="max-w-3xl mx-auto p-6">
-					<button
-						onClick={() => navigate(-1)}
-						className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6"
-					>
-						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-						</svg>
-						戻る
-					</button>
 					<div className="card p-8 text-center">
 						<p className="text-gray-500 dark:text-gray-400">{error || "課題が見つかりません"}</p>
 						<button onClick={refresh} className="mt-4 text-purple-600 hover:text-purple-700 font-semibold">
@@ -112,16 +102,8 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 	return (
 		<div className="page-bg min-h-screen">
 			<div className="max-w-3xl mx-auto p-6">
-				{/* Header with back button */}
-				<header className="flex items-center gap-4 mb-6">
-					<button
-						onClick={() => navigate(-1)}
-						className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-					>
-						<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-						</svg>
-					</button>
+				{/* Header */}
+				<header className="mb-6">
 					<h1 className="text-xl font-bold text-gray-900 dark:text-white">課題の詳細</h1>
 				</header>
 
