@@ -12,45 +12,43 @@ function getStateInfo(state: HomeworkState): {
   label: string;
   bgClass: string;
   textClass: string;
-  isGradient?: boolean;
 } {
   switch (state) {
     case 'notAssigned':
       return {
         label: '未提出',
-        bgClass: 'bg-gray-200',
-        textClass: 'text-gray-700',
+        bgClass: 'bg-gray-700/50 border border-gray-600',
+        textClass: 'text-gray-300',
       };
     case 'generatingQuestions':
       return {
         label: '問題生成中',
-        bgClass: 'bg-gradient-to-r from-purple-500 to-blue-400',
-        textClass: 'text-white',
-        isGradient: true,
+        bgClass: 'bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50',
+        textClass: 'text-purple-300',
       };
     case 'questionGenerated':
       return {
         label: '問題生成完了',
-        bgClass: 'bg-blue-100',
-        textClass: 'text-blue-700',
+        bgClass: 'bg-blue-500/20 border border-blue-500/50',
+        textClass: 'text-blue-300',
       };
     case 'completed':
       return {
         label: '提出完了',
-        bgClass: 'bg-green-100',
-        textClass: 'text-green-700',
+        bgClass: 'bg-emerald-500/20 border border-emerald-500/50',
+        textClass: 'text-emerald-300',
       };
     case 'failed':
       return {
         label: '生成失敗',
-        bgClass: 'bg-red-100',
-        textClass: 'text-red-700',
+        bgClass: 'bg-red-500/20 border border-red-500/50',
+        textClass: 'text-red-300',
       };
     default:
       return {
         label: '不明',
-        bgClass: 'bg-gray-200',
-        textClass: 'text-gray-700',
+        bgClass: 'bg-gray-700/50 border border-gray-600',
+        textClass: 'text-gray-300',
       };
   }
 }
@@ -70,18 +68,18 @@ export function HomeworkItemView({
   return (
     <div
       onClick={onClick}
-      className="w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+      className="glass-card-hover w-full p-5 cursor-pointer"
     >
       <div className="flex items-center">
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Title */}
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+          <h3 className="text-lg font-semibold text-white truncate">
             {homework.title}
           </h3>
 
           {/* Due date */}
-          <div className="flex items-center gap-1 mt-2 text-gray-500">
+          <div className="flex items-center gap-1.5 mt-2 text-gray-400">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -101,7 +99,7 @@ export function HomeworkItemView({
           {/* Status badge */}
           <div className="mt-3">
             <span
-              className={`inline-block px-3 py-1.5 rounded-full text-sm font-semibold ${stateInfo.bgClass} ${stateInfo.textClass}`}
+              className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium ${stateInfo.bgClass} ${stateInfo.textClass}`}
             >
               {stateInfo.label}
             </span>
@@ -110,7 +108,7 @@ export function HomeworkItemView({
 
         {/* Right side - Lottie animation for generating state */}
         {homework.submission_state === 'generatingQuestions' && (
-          <div className="ml-4 w-20 h-20">
+          <div className="ml-4 w-16 h-16">
             <Lottie
               animationData={aiAnimation}
               loop={true}
@@ -125,10 +123,23 @@ export function HomeworkItemView({
               e.stopPropagation();
               onAnswerClick();
             }}
-            className="ml-4 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-colors"
+            className="ml-4 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20"
           >
             回答
           </button>
+        )}
+
+        {/* Arrow for other states */}
+        {homework.submission_state !== 'generatingQuestions' && 
+         homework.submission_state !== 'questionGenerated' && (
+          <svg
+            className="ml-4 w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         )}
       </div>
     </div>

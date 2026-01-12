@@ -5,50 +5,57 @@ interface ClassItemViewProps {
   onClick?: () => void;
 }
 
-const colors = [
-  'bg-emerald-500',
-  'bg-teal-500',
-  'bg-blue-500',
-  'bg-amber-600',
-  'bg-orange-500',
-  'bg-cyan-500',
-  'bg-gray-500',
-  'bg-green-500',
-  'bg-indigo-500',
-  'bg-mint-500',
+const gradients = [
+  'from-emerald-500 to-teal-600',
+  'from-blue-500 to-indigo-600',
+  'from-purple-500 to-pink-600',
+  'from-orange-500 to-red-600',
+  'from-cyan-500 to-blue-600',
+  'from-pink-500 to-rose-600',
+  'from-indigo-500 to-purple-600',
+  'from-teal-500 to-cyan-600',
 ];
 
-function getColorForClass(classId: string): string {
-  // Use class ID to get a consistent color
-  const index = classId.charCodeAt(0) % colors.length;
-  return colors[index];
+function getGradientForClass(classId: string): string {
+  const index = classId.charCodeAt(0) % gradients.length;
+  return gradients[index];
 }
 
 export function ClassItemView({ classData, onClick }: ClassItemViewProps) {
   const firstChar = classData.name.charAt(0).toUpperCase();
-  const bgColor = getColorForClass(classData.id);
+  const gradient = getGradientForClass(classData.id);
 
   return (
     <div
       onClick={onClick}
-      className="flex items-center w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+      className="glass-card-hover flex items-center w-full p-4 cursor-pointer"
     >
-      {/* Icon with first character */}
+      {/* Icon with gradient background */}
       <div
-        className={`flex items-center justify-center w-15 h-15 rounded-xl ${bgColor}`}
+        className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}
       >
         <span className="text-2xl font-bold text-white">{firstChar}</span>
       </div>
 
       {/* Class info */}
-      <div className="ml-5 flex-1 min-w-0">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+      <div className="ml-4 flex-1 min-w-0">
+        <h3 className="text-lg font-bold text-white truncate">
           {classData.name}
         </h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-gray-400 text-sm mt-0.5">
           {classData.teacher_name}
         </p>
       </div>
+
+      {/* Arrow */}
+      <svg
+        className="w-5 h-5 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
     </div>
   );
 }
