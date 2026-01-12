@@ -1,6 +1,8 @@
 import type { User } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { useClassListViewModel } from "../hooks/useClassListViewModel";
 import { ClassItemView } from "../components/ClassItemView";
+import { getClassHomeworksPath } from "../router/paths";
 
 interface ClassListViewProps {
 	user: User;
@@ -96,6 +98,7 @@ function AddClassModal({
 }
 
 export function ClassListView({ user }: ClassListViewProps) {
+	const navigate = useNavigate();
 	const {
 		classes,
 		isLoading,
@@ -147,7 +150,7 @@ export function ClassListView({ user }: ClassListViewProps) {
 								key={classItem.id}
 								classData={classItem}
 								onClick={() => {
-									console.log("Navigate to class:", classItem.id);
+									navigate(getClassHomeworksPath(classItem.id));
 								}}
 							/>
 						))}

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { LoginView } from './pages/LoginView';
 import { HomeView } from './pages/HomeView';
 import { ClassListView } from './pages/ClassListView';
+import { ClassHomeworkListView } from './pages/ClassHomeworkListView';
 import { HomeworkListView } from './pages/HomeworkListView';
 import { ProfileView } from './pages/ProfileView';
 import { Loading } from './components/Loading';
@@ -52,6 +53,16 @@ function App() {
               <ProtectedRoute>
                 {(user, authenticating) =>
                   authenticating ? <Loading /> : <ClassListView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.CLASS_HOMEWORKS}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <ClassHomeworkListView user={user} />
                 }
               </ProtectedRoute>
             }
