@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { classApi, homeworkApi, userApi } from '../api';
-import type { Class, HomeworkWithStatus, UserData } from '../types/models';
+import type { Class, HomeworkWithStatus, UserData, HomeworkState } from '../types/models';
+
+// Priority for submission states (lower = higher priority)
+const submissionStatePriority: Record<HomeworkState, number> = {
+  notAssigned: 0,
+  failed: 1,
+  questionGenerated: 2,
+  generatingQuestions: 3,
+  completed: 4,
+};
 
 export function useHomeViewModel(user: User) {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -32,16 +41,27 @@ export function useHomeViewModel(user: User) {
   const loadHomeworks = useCallback(async () => {
     try {
       const data = await homeworkApi.fetchHomeworks(user.uid);
-      // Sort by due date and filter for upcoming ones
-      const sorted = data
-        .filter((h) => h.due_date)
-        .sort((a, b) => {
-          if (!a.due_date) return 1;
-          if (!b.due_date) return -1;
-          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-        })
-        .slice(0, 5); // Show only 5 upcoming
-      setHomeworks(sorted);
+      
+      // 1. Filter out completed homeworks
+      const filtered = data.filter((h) => h.submission_state !== 'completed');
+      
+      // 2. Sort by due date (ascending), then by submission state priority
+      const sorted = filtered.sort((a, b) => {
+        const aDate = a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER;
+        const bDate = b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER;
+        
+        if (aDate !== bDate) {
+          return aDate - bDate;
+        }
+        
+        // Same due date, sort by submission state priority
+        const aPriority = submissionStatePriority[a.submission_state] ?? 999;
+        const bPriority = submissionStatePriority[b.submission_state] ?? 999;
+        return aPriority - bPriority;
+      });
+      
+      // 3. Return top 10
+      setHomeworks(sorted.slice(0, 10));
     } catch (e) {
       console.error('Failed to load homeworks:', e);
       setHomeworks([]);
