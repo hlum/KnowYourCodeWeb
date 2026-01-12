@@ -1,6 +1,8 @@
 import type { User } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { authManager } from "../firebase/authManager";
 import { useProfileViewModel } from "../hooks/useProfileViewModel";
+import { Paths } from "../router/paths";
 import {
 	BarChart,
 	Bar,
@@ -46,6 +48,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 		goToNextYear,
 	} = useProfileViewModel(user);
 
+	const navigate = useNavigate();
 	const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
 	const handleLogout = async () => {
@@ -252,7 +255,10 @@ export function ProfileView({ user }: ProfileViewProps) {
 				</div>
 
 				{/* Stats Section */}
-				<div className="border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-4 mb-6">
+				<button
+					onClick={() => navigate(Paths.DETAIL_AVERAGE_SCORE)}
+					className="w-full border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-4 mb-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+				>
 					<div className="flex">
 						{/* Completed Homeworks */}
 						<div className="flex-1 flex flex-col items-center py-4">
@@ -303,7 +309,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 							</span>
 						</div>
 					</div>
-				</div>
+				</button>
 
 				{/* Logout Button */}
 				<button

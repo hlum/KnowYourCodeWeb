@@ -7,6 +7,7 @@ export const Paths = {
   HOMEWORK_DETAIL: '/homeworks/:homeworkId' as const,
   HOMEWORK_QUESTIONS: '/homeworks/:homeworkId/questions' as const,
   PROFILE: '/profile' as const,
+  DETAIL_AVERAGE_SCORE: '/profile/stats' as const,
 } as const;
 
 export function getClassHomeworksPath(classId: string): string {

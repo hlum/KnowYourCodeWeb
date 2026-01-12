@@ -7,6 +7,7 @@ import { HomeworkListView } from './pages/HomeworkListView';
 import { HomeworkDetailView } from './pages/HomeworkDetailView';
 import { QuestionsView } from './pages/QuestionsView';
 import { ProfileView } from './pages/ProfileView';
+import { DetailAverageScoreView } from './pages/DetailAverageScoreView';
 import { Loading } from './components/Loading';
 import { MainLayout } from './components/MainLayout';
 import { GuestRoute } from './router/GuestRoute';
@@ -105,6 +106,16 @@ function App() {
               <ProtectedRoute>
                 {(user, authenticating) =>
                   authenticating ? <Loading /> : <ProfileView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.DETAIL_AVERAGE_SCORE}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <DetailAverageScoreView user={user} />
                 }
               </ProtectedRoute>
             }
