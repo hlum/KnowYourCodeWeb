@@ -122,7 +122,24 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 					<div className="flex items-start justify-between mb-4">
 						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">{homework.title}</h2>
 						{result?.score !== undefined && (
-							<div className="flex items-center justify-center w-16 h-16 rounded-full border-4 border-purple-500">
+							<div className="relative flex items-center justify-center w-16 h-16">
+								{/* Gradient circle border */}
+								<svg className="absolute inset-0 w-full h-full" viewBox="0 0 64 64">
+									<defs>
+										<linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+											<stop offset="0%" stopColor="#a855f7" />
+											<stop offset="100%" stopColor="#ec4899" />
+										</linearGradient>
+									</defs>
+									<circle
+										cx="32"
+										cy="32"
+										r="28"
+										fill="none"
+										stroke="url(#scoreGradient)"
+										strokeWidth="4"
+									/>
+								</svg>
 								<span className="text-sm font-bold text-gray-900 dark:text-white">{result.score}点</span>
 							</div>
 						)}
