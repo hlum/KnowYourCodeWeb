@@ -23,6 +23,12 @@ export function QuestionAndChoicesItemView({
 	const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+	const onClickNextRef = useRef(onClickNext);
+
+	// Keep onClickNext ref updated
+	useEffect(() => {
+		onClickNextRef.current = onClickNext;
+	}, [onClickNext]);
 
 	// Initialize for review mode
 	useEffect(() => {
@@ -33,30 +39,30 @@ export function QuestionAndChoicesItemView({
 	}, [mode, selectedChoiceIdFromServer]);
 
 	// Timer logic for answering mode
-	const startTimer = useCallback(() => {
-		if (timerRef.current) {
-			clearInterval(timerRef.current);
-		}
-		setRemainingTime(TIMER_DURATION);
-		timerRef.current = setInterval(() => {
-			setRemainingTime((prev) => {
-				if (prev <= 1) {
-					// Time's up - auto submit with no answer
-					clearInterval(timerRef.current!);
-					onClickNext?.(null);
-					return TIMER_DURATION;
-				}
-				return prev - 1;
-			});
-		}, 1000);
-	}, [onClickNext]);
-
 	const stopTimer = useCallback(() => {
 		if (timerRef.current) {
 			clearInterval(timerRef.current);
 			timerRef.current = null;
 		}
 	}, []);
+
+	const startTimer = useCallback(() => {
+		stopTimer();
+		setRemainingTime(TIMER_DURATION);
+		timerRef.current = setInterval(() => {
+			setRemainingTime((prev) => {
+				if (prev <= 1) {
+					// Time's up - auto submit with no answer
+					clearInterval(timerRef.current!);
+					timerRef.current = null;
+					// Use ref to avoid stale closure
+					onClickNextRef.current?.(null);
+					return TIMER_DURATION;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+	}, [stopTimer]);
 
 	const restartTimer = useCallback(() => {
 		setRemainingTime(TIMER_DURATION);
@@ -70,7 +76,7 @@ export function QuestionAndChoicesItemView({
 			startTimer();
 		}
 		return () => stopTimer();
-	}, [mode, startTimer, stopTimer]);
+	}, [mode, questionAndChoices.question_id, startTimer, stopTimer]);
 
 	// Reset state when question changes
 	useEffect(() => {

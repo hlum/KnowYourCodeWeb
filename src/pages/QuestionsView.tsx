@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuestionsViewModel, type QuestionViewMode } from '../hooks/useQuestionsViewModel';
 import { QuestionAndChoicesItemView } from '../components/QuestionAndChoicesItemView';
+import { getHomeworkDetailPath } from '../router/paths';
 
 interface QuestionsViewProps {
 	user: User;
@@ -51,27 +52,46 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 		goToNext,
 	} = useQuestionsViewModel(user, homeworkId || '', mode);
 
+	// Prevent back navigation during answering mode
+	useEffect(() => {
+		if (mode === 'answering') {
+			const handlePopState = (e: PopStateEvent) => {
+				e.preventDefault();
+				// Push state back to prevent navigation
+				window.history.pushState(null, '', window.location.href);
+			};
+
+			// Push initial state
+			window.history.pushState(null, '', window.location.href);
+			window.addEventListener('popstate', handlePopState);
+
+			return () => {
+				window.removeEventListener('popstate', handlePopState);
+			};
+		}
+	}, [mode]);
+
 	// Post initial empty answer when starting to answer (to record that answering has started)
 	useEffect(() => {
 		if (mode === 'answering' && currentQuestion) {
 			postAnswer(currentQuestion.question_id, null);
 		}
-	}, [mode, currentQuestion?.question_id]);
+	}, [mode, currentQuestion?.question_id, postAnswer]);
 
-	const handleNext = async (selectedChoiceId: string | null) => {
-		if (!currentQuestion) return;
+	const handleNext = useCallback(async (selectedChoiceId: string | null) => {
+		if (!currentQuestion || !homeworkId) return;
 
 		// Post the answer
 		await postAnswer(currentQuestion.question_id, selectedChoiceId);
 
 		if (isLastQuestion) {
-			// Quiz finished, go back
-			navigate(-1);
+			// Quiz finished, navigate to homework detail (replace to prevent going back)
+			navigate(getHomeworkDetailPath(homeworkId), { replace: true });
 		} else {
 			// Go to next question
 			goToNext();
 		}
-	};
+	}, [currentQuestion, homeworkId, isLastQuestion, postAnswer, goToNext, navigate]);
 
 	if (!homeworkId) {
 		return (
