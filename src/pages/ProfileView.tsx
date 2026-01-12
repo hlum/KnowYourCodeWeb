@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { authManager } from "../firebase/authManager";
 import { useProfileViewModel } from "../hooks/useProfileViewModel";
 import { Paths } from "../router/paths";
+import defaultProfilePic from "../assets/profilePic.jpg";
 import {
 	BarChart,
 	Bar,
@@ -83,17 +84,11 @@ export function ProfileView({ user }: ProfileViewProps) {
 			<div className="max-w-2xl mx-auto p-6">
 				{/* Profile Basic Info */}
 				<div className="flex flex-col items-center mb-8">
-					{photoURL ? (
-						<img
-							src={photoURL}
-							alt="Profile"
-							className="w-36 h-36 rounded-full border-4 border-purple-200 shadow-lg object-cover mb-4"
-						/>
-					) : (
-						<div className="w-36 h-36 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold text-5xl mb-4 shadow-lg">
-							{displayName.charAt(0).toUpperCase()}
-						</div>
-					)}
+					<img
+						src={photoURL || defaultProfilePic}
+						alt="Profile"
+						className="w-36 h-36 rounded-full border-4 border-purple-200 shadow-lg object-cover mb-4"
+					/>
 					<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
 						{displayName}
 					</h2>

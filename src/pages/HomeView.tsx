@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useHomeViewModel } from "../hooks/useHomeViewModel";
 import { ClassItemView } from "../components/ClassItemView";
 import { HomeworkItemView } from "../components/HomeworkItemView";
-import { getClassHomeworksPath, getHomeworkDetailPath } from "../router/paths";
+import { Paths, getClassHomeworksPath, getHomeworkDetailPath } from "../router/paths";
+import defaultProfilePic from "../assets/profilePic.jpg";
 
 interface HomeViewProps {
 	user: User;
@@ -67,13 +68,11 @@ export function HomeView({ user }: HomeViewProps) {
 						<h1 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h1>
 					</div>
 					<div className="flex items-center gap-4">
-						{photoURL ? (
-							<img src={photoURL} alt="Profile" className="w-14 h-14 rounded-full border-2 border-white/50 shadow-lg object-cover" />
-						) : (
-							<div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold text-xl">
-								{displayName.charAt(0).toUpperCase()}
-							</div>
-						)}
+						<img 
+							src={photoURL || defaultProfilePic} 
+							alt="Profile" 
+							className="w-14 h-14 rounded-full border-2 border-white/50 shadow-lg object-cover" 
+						/>
 					</div>
 				</header>
 
@@ -89,12 +88,15 @@ export function HomeView({ user }: HomeViewProps) {
 
 				{/* Classes Section */}
 				<section className="mb-10">
-					<div className="flex items-center gap-2 mb-4">
+					<button 
+						onClick={() => navigate(Paths.CLASSES)}
+						className="flex items-center gap-2 mb-4 hover:opacity-70 transition-opacity"
+					>
 						<h2 className="text-xl font-bold text-gray-900 dark:text-white">科目</h2>
 						<svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 						</svg>
-					</div>
+					</button>
 
 					{classes.length > 0 ? (
 						<div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
@@ -131,12 +133,15 @@ export function HomeView({ user }: HomeViewProps) {
 
 				{/* Upcoming Homeworks Section */}
 				<section>
-					<div className="flex items-center gap-2 mb-4">
+					<button 
+						onClick={() => navigate(Paths.HOMEWORKS)}
+						className="flex items-center gap-2 mb-4 hover:opacity-70 transition-opacity"
+					>
 						<h2 className="text-xl font-bold text-gray-900 dark:text-white">提出期限が近い課題</h2>
 						<svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 						</svg>
-					</div>
+					</button>
 
 					{homeworks.length > 0 ? (
 						<div className="space-y-4">
