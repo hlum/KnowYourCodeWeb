@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useQuestionsViewModel, type QuestionViewMode } from '../hooks/useQuestionsViewModel';
 import { QuestionAndChoicesItemView } from '../components/QuestionAndChoicesItemView';
 import { getHomeworkDetailPath } from '../router/paths';
@@ -9,24 +10,49 @@ interface QuestionsViewProps {
 	user: User;
 }
 
+const containerVariants = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: {
+			staggerChildren: 0.1,
+			delayChildren: 0.1,
+		},
+	},
+};
+
+const itemVariants = {
+	hidden: { opacity: 0, y: 20 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.4 },
+	},
+};
+
 function QuestionsViewSkeleton() {
 	return (
-		<div className="page-bg min-h-screen animate-pulse">
-			<div className="max-w-2xl mx-auto p-6">
-				<div className="flex items-center gap-4 mb-6">
-					<div className="w-10 h-10 bg-gray-300 rounded-lg" />
-					<div className="h-8 w-32 bg-gray-300 rounded" />
+		<div className="login-bg min-h-screen">
+			<div className="max-w-2xl mx-auto p-6 animate-pulse">
+				{/* Header skeleton */}
+				<div className="glass-card p-6 mb-6">
+					<div className="flex items-center justify-between">
+						<div className="h-6 w-32 bg-white/10 rounded" />
+						<div className="h-5 w-16 bg-white/10 rounded" />
+					</div>
 				</div>
-				<div className="bg-gray-200 dark:bg-gray-700 rounded-2xl p-6">
-					<div className="h-4 w-24 bg-gray-300 rounded mb-4" />
-					<div className="h-6 w-full bg-gray-300 rounded mb-2" />
-					<div className="h-6 w-3/4 bg-gray-300 rounded mb-6" />
+
+				{/* Question skeleton */}
+				<div className="glass-card p-6">
+					<div className="h-4 w-24 bg-white/10 rounded mb-4" />
+					<div className="h-6 w-full bg-white/10 rounded mb-2" />
+					<div className="h-6 w-3/4 bg-white/10 rounded mb-6" />
 					<div className="space-y-3">
 						{[1, 2, 3, 4].map((i) => (
-							<div key={i} className="h-14 bg-gray-300 rounded-xl" />
+							<div key={i} className="h-14 bg-white/10 rounded-xl" />
 						))}
 					</div>
-					<div className="h-14 bg-gray-300 rounded-xl mt-6" />
+					<div className="h-14 bg-white/10 rounded-xl mt-6" />
 				</div>
 			</div>
 		</div>
@@ -103,8 +129,8 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 
 	if (!homeworkId) {
 		return (
-			<div className="page-bg min-h-screen flex items-center justify-center">
-				<p className="text-gray-500">課題が見つかりません</p>
+			<div className="login-bg min-h-screen flex items-center justify-center">
+				<p className="text-gray-400">課題が見つかりません</p>
 			</div>
 		);
 	}
@@ -114,57 +140,91 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 	}
 
 	return (
-		<div className="page-bg min-h-screen">
-			<div className="max-w-2xl mx-auto p-6">
+		<div className="login-bg min-h-screen pb-24">
+			{/* Background effects */}
+			<div className="fixed inset-0 overflow-hidden pointer-events-none">
+				<div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+				<div className="absolute bottom-1/3 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+			</div>
+
+			<motion.div
+				variants={containerVariants}
+				initial="hidden"
+				animate="visible"
+				className="relative z-10 max-w-2xl mx-auto p-6"
+			>
 				{/* Header */}
-				<header className="flex items-center justify-between mb-6">
-					<h1 className="text-xl font-bold text-gray-900 dark:text-white">
-						{mode === 'answering' ? '質問一覧' : '回答履歴'}
-					</h1>
-					{mode === 'answering' && (
-						<span className="text-gray-500 dark:text-gray-400">
-							{currentIndex + 1} / {questionsWithChoices.length}
-						</span>
-					)}
-				</header>
+				<motion.header
+					variants={itemVariants}
+					className="glass-card p-6 mb-6"
+				>
+					<div className="flex items-center justify-between">
+						<h1 className="text-xl font-bold text-white">
+							{mode === 'answering' ? '質問一覧' : '回答履歴'}
+						</h1>
+						{mode === 'answering' && (
+							<span className="text-gray-400 bg-white/10 px-3 py-1 rounded-full text-sm">
+								{currentIndex + 1} / {questionsWithChoices.length}
+							</span>
+						)}
+					</div>
+				</motion.header>
 
 				{/* Error message */}
 				{error && (
-					<div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl">
-						{error}
-					</div>
+					<motion.div
+						initial={{ opacity: 0, y: -10 }}
+						animate={{ opacity: 1, y: 0 }}
+						className="mb-6 p-4 glass-card border-red-500/30"
+					>
+						<span className="text-red-400">{error}</span>
+					</motion.div>
 				)}
 
 				{/* Questions */}
-				{mode === 'answering' ? (
-					// Answering mode - show one question at a time
-					currentQuestion && (
-						<QuestionAndChoicesItemView
-							key={currentQuestion.question_id}
-							questionAndChoices={currentQuestion}
-							mode={mode}
-							isLastQuestion={isLastQuestion}
-							onClickNext={handleNext}
-						/>
-					)
-				) : (
-					// Review mode - show all questions in a scrollable list
-					<div className="space-y-6">
-						{questionsWithChoices.map((question, index) => (
-							<div key={question.question_id}>
-								<p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-									問題 {index + 1} / {questionsWithChoices.length}
-								</p>
+				<motion.div variants={itemVariants}>
+					{mode === 'answering' ? (
+						// Answering mode - show one question at a time
+						currentQuestion && (
+							<motion.div
+								key={currentQuestion.question_id}
+								initial={{ opacity: 0, x: 20 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: -20 }}
+								transition={{ duration: 0.3 }}
+							>
 								<QuestionAndChoicesItemView
-									questionAndChoices={question}
+									questionAndChoices={currentQuestion}
 									mode={mode}
-									selectedChoiceIdFromServer={questionIdAndSelectedChoiceId[question.question_id]}
+									isLastQuestion={isLastQuestion}
+									onClickNext={handleNext}
 								/>
-							</div>
-						))}
-					</div>
-				)}
-			</div>
+							</motion.div>
+						)
+					) : (
+						// Review mode - show all questions in a scrollable list
+						<div className="space-y-6">
+							{questionsWithChoices.map((question, index) => (
+								<motion.div
+									key={question.question_id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: index * 0.1 }}
+								>
+									<p className="text-sm text-gray-400 mb-2">
+										問題 {index + 1} / {questionsWithChoices.length}
+									</p>
+									<QuestionAndChoicesItemView
+										questionAndChoices={question}
+										mode={mode}
+										selectedChoiceIdFromServer={questionIdAndSelectedChoiceId[question.question_id]}
+									/>
+								</motion.div>
+							))}
+						</div>
+					)}
+				</motion.div>
+			</motion.div>
 		</div>
 	);
 }

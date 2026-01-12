@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import type { QuestionWithChoices, Choice } from '../types/models';
 import type { QuestionViewMode } from '../hooks/useQuestionsViewModel';
 
@@ -10,7 +11,128 @@ interface QuestionAndChoicesItemViewProps {
 	selectedChoiceIdFromServer?: string | null; // for review mode
 }
 
-const TIMER_DURATION = 20; // seconds
+const MAIN_TIMER_DURATION = 20; // seconds for main timer
+const ARC_TIMER_DURATION = 10; // seconds for arc timer button
+
+// Arc Timer Button Component - uses requestAnimationFrame for smooth animation
+interface ArcTimerButtonProps {
+	duration: number;
+	size?: number;
+	lineWidth?: number;
+	label?: string;
+	accentColor?: string;
+	warningColor?: string;
+	warningThreshold?: number;
+	onComplete?: () => void;
+	resetTrigger?: number;
+}
+
+function ArcTimerButton({
+	duration,
+	size = 70,
+	lineWidth = 10,
+	label = "PUSH",
+	accentColor = '#8b5cf6',
+	warningColor = '#ef4444',
+	warningThreshold = 3,
+	onComplete,
+	resetTrigger = 0,
+}: ArcTimerButtonProps) {
+	const [progress, setProgress] = useState(0);
+	const rafRef = useRef<number>(0);
+	const startTimeRef = useRef<number>(Date.now());
+	const onCompleteRef = useRef(onComplete);
+	const hasCompletedRef = useRef(false);
+
+	useEffect(() => {
+		onCompleteRef.current = onComplete;
+	}, [onComplete]);
+
+	const remainingSeconds = Math.max(0, Math.ceil((1 - progress) * duration));
+	const isWarning = remainingSeconds <= warningThreshold && remainingSeconds > 0;
+	const currentColor = isWarning ? warningColor : accentColor;
+
+	// Animation loop using requestAnimationFrame
+	useEffect(() => {
+		startTimeRef.current = Date.now();
+		hasCompletedRef.current = false;
+		setProgress(0);
+
+		const animate = () => {
+			const elapsed = (Date.now() - startTimeRef.current) / 1000;
+			const newProgress = Math.min(1, elapsed / duration);
+			setProgress(newProgress);
+
+			if (newProgress >= 1 && !hasCompletedRef.current) {
+				hasCompletedRef.current = true;
+				onCompleteRef.current?.();
+				// Restart after completion
+				startTimeRef.current = Date.now();
+				hasCompletedRef.current = false;
+			}
+
+			rafRef.current = requestAnimationFrame(animate);
+		};
+
+		rafRef.current = requestAnimationFrame(animate);
+		return () => cancelAnimationFrame(rafRef.current);
+	}, [duration, resetTrigger]);
+
+	const handleClick = () => {
+		// Full reset - restart from beginning
+		startTimeRef.current = Date.now();
+		hasCompletedRef.current = false;
+		setProgress(0);
+	};
+
+	const radius = (size - lineWidth) / 2;
+	const circumference = 2 * Math.PI * radius;
+	const strokeDashoffset = circumference * progress;
+
+	return (
+		<motion.button
+			onClick={handleClick}
+			animate={{ scale: [1, 1.05, 1] }}
+			transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+			className="relative flex items-center justify-center"
+			style={{ width: size, height: size }}
+		>
+			<svg width={size} height={size} className="transform -rotate-90">
+				{/* Background circle */}
+				<circle
+					cx={size / 2}
+					cy={size / 2}
+					r={radius}
+					fill="none"
+					stroke={currentColor}
+					strokeOpacity={0.15}
+					strokeWidth={lineWidth}
+					strokeLinecap="round"
+				/>
+				{/* Progress arc */}
+				<circle
+					cx={size / 2}
+					cy={size / 2}
+					r={radius}
+					fill="none"
+					stroke={currentColor}
+					strokeWidth={lineWidth}
+					strokeLinecap="round"
+					strokeDasharray={circumference}
+					strokeDashoffset={strokeDashoffset}
+				/>
+			</svg>
+			<div className="absolute inset-0 flex items-center justify-center">
+				<span 
+					className="text-sm font-semibold"
+					style={{ color: isWarning ? warningColor : 'white' }}
+				>
+					{label}
+				</span>
+			</div>
+		</motion.button>
+	);
+}
 
 export function QuestionAndChoicesItemView({
 	questionAndChoices,
@@ -19,9 +141,10 @@ export function QuestionAndChoicesItemView({
 	onClickNext,
 	selectedChoiceIdFromServer,
 }: QuestionAndChoicesItemViewProps) {
-	const [remainingTime, setRemainingTime] = useState(TIMER_DURATION);
+	const [remainingTime, setRemainingTime] = useState(MAIN_TIMER_DURATION);
 	const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
+	const [arcTimerReset, setArcTimerReset] = useState(0);
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const onClickNextRef = useRef(onClickNext);
 
@@ -38,7 +161,7 @@ export function QuestionAndChoicesItemView({
 		}
 	}, [mode, selectedChoiceIdFromServer]);
 
-	// Timer logic for answering mode
+	// Main Timer logic for answering mode
 	const stopTimer = useCallback(() => {
 		if (timerRef.current) {
 			clearInterval(timerRef.current);
@@ -46,30 +169,47 @@ export function QuestionAndChoicesItemView({
 		}
 	}, []);
 
-	const startTimer = useCallback(() => {
+	const restartTimer = useCallback(() => {
 		stopTimer();
-		setRemainingTime(TIMER_DURATION);
+		setRemainingTime(MAIN_TIMER_DURATION);
+		setSelectedChoiceId(null);
+		setSubmitted(false);
+		setArcTimerReset((prev) => prev + 1);
+		
 		timerRef.current = setInterval(() => {
 			setRemainingTime((prev) => {
 				if (prev <= 1) {
-					// Time's up - auto submit with no answer
 					clearInterval(timerRef.current!);
 					timerRef.current = null;
-					// Use ref to avoid stale closure
-					onClickNextRef.current?.(null);
-					return TIMER_DURATION;
+					// Time's up - auto submit with null and go to next
+					setTimeout(() => {
+						onClickNextRef.current?.(null);
+					}, 0);
+					return 0;
 				}
 				return prev - 1;
 			});
 		}, 1000);
 	}, [stopTimer]);
 
-	const restartTimer = useCallback(() => {
-		setRemainingTime(TIMER_DURATION);
-		setSelectedChoiceId(null);
-		setSubmitted(false);
-		startTimer();
-	}, [startTimer]);
+	const startTimer = useCallback(() => {
+		stopTimer();
+		setRemainingTime(MAIN_TIMER_DURATION);
+		timerRef.current = setInterval(() => {
+			setRemainingTime((prev) => {
+				if (prev <= 1) {
+					clearInterval(timerRef.current!);
+					timerRef.current = null;
+					// Time's up - auto submit with null and go to next
+					setTimeout(() => {
+						onClickNextRef.current?.(null);
+					}, 0);
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+	}, [stopTimer]);
 
 	useEffect(() => {
 		if (mode === 'answering') {
@@ -83,7 +223,8 @@ export function QuestionAndChoicesItemView({
 		if (mode === 'answering') {
 			setSelectedChoiceId(null);
 			setSubmitted(false);
-			setRemainingTime(TIMER_DURATION);
+			setRemainingTime(MAIN_TIMER_DURATION);
+			setArcTimerReset((prev) => prev + 1);
 		}
 	}, [questionAndChoices.question_id, mode]);
 
@@ -95,9 +236,8 @@ export function QuestionAndChoicesItemView({
 
 	const handleSubmit = () => {
 		if (!submitted) {
-			// Submit answer
+			// Submit answer - show correct/incorrect
 			setSubmitted(true);
-			stopTimer();
 		} else {
 			// Go to next question
 			onClickNext?.(selectedChoiceId);
@@ -106,6 +246,16 @@ export function QuestionAndChoicesItemView({
 			}
 		}
 	};
+
+	// Arc timer complete - go to next question with null
+	const handleArcTimerComplete = useCallback(() => {
+		onClickNextRef.current?.(null);
+		if (!isLastQuestion) {
+			setRemainingTime(MAIN_TIMER_DURATION);
+			setSelectedChoiceId(null);
+			setSubmitted(false);
+		}
+	}, [isLastQuestion]);
 
 	const isChoiceSelected = (choice: Choice) => {
 		if (mode === 'answering') {
@@ -119,28 +269,34 @@ export function QuestionAndChoicesItemView({
 	const buttonLabel = !submitted ? '回答を送信' : isLastQuestion ? '完了' : '次へ';
 
 	const buttonColor = !submitted
-		? 'bg-blue-500 hover:bg-blue-600'
+		? 'btn-gradient'
 		: isLastQuestion
 			? 'bg-green-500 hover:bg-green-600'
 			: 'bg-orange-500 hover:bg-orange-600';
 
+	const isWarning = remainingTime <= 5;
+
 	return (
 		<div className="w-full max-w-2xl mx-auto">
-			<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+			<div className="glass-card p-6">
 				{/* Timer for answering mode */}
 				{mode === 'answering' && (
-					<p className={`text-sm font-semibold mb-4 ${remainingTime <= 5 ? 'text-red-500' : 'text-red-400'}`}>
+					<motion.p
+						className={`text-sm font-semibold mb-4 ${isWarning ? 'text-red-400' : 'text-red-400/70'}`}
+						animate={isWarning ? { scale: [1, 1.05, 1] } : {}}
+						transition={{ duration: 0.5, repeat: isWarning ? Infinity : 0 }}
+					>
 						残り時間: {remainingTime}秒
-					</p>
+					</motion.p>
 				)}
 
 				{/* Unanswered label for review mode */}
 				{mode === 'review' && !selectedChoiceIdFromServer && (
-					<p className="text-red-500 text-sm font-semibold mb-4">未回答</p>
+					<p className="text-red-400 text-sm font-semibold mb-4">未回答</p>
 				)}
 
 				{/* Question text */}
-				<h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 leading-relaxed">
+				<h3 className="text-lg font-bold text-white mb-6 leading-relaxed">
 					{questionAndChoices.question_text}
 				</h3>
 
@@ -160,19 +316,38 @@ export function QuestionAndChoicesItemView({
 
 				{/* Submit/Next button for answering mode */}
 				{mode === 'answering' && (
-					<button
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
 						onClick={handleSubmit}
 						disabled={!selectedChoiceId && !submitted}
-						className={`w-full py-4 font-semibold rounded-xl text-white transition-colors ${
+						className={`w-full py-4 font-semibold rounded-xl text-white transition-all ${
 							!selectedChoiceId && !submitted
-								? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed opacity-60'
+								? 'bg-white/10 cursor-not-allowed opacity-60'
 								: buttonColor
 						}`}
 					>
 						{buttonLabel}
-					</button>
+					</motion.button>
 				)}
 			</div>
+
+			{/* Arc Timer Button - always visible in answering mode */}
+			{mode === 'answering' && (
+				<div className="flex justify-center mt-6">
+					<ArcTimerButton
+						duration={ARC_TIMER_DURATION}
+						size={70}
+						lineWidth={10}
+						label="PUSH"
+						accentColor="#8b5cf6"
+						warningColor="#ef4444"
+						warningThreshold={3}
+						onComplete={handleArcTimerComplete}
+						resetTrigger={arcTimerReset}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -191,13 +366,13 @@ function ChoiceButton({ choice, isSelected, submitted, onClick, disabled }: Choi
 		if (submitted) {
 			if (choice.is_correct) {
 				return (
-					<svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+					<svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24">
 						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
 					</svg>
 				);
 			} else if (isSelected) {
 				return (
-					<svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+					<svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24">
 						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" />
 					</svg>
 				);
@@ -207,7 +382,7 @@ function ChoiceButton({ choice, isSelected, submitted, onClick, disabled }: Choi
 
 		if (isSelected) {
 			return (
-				<svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+				<svg className="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
 					<circle cx="12" cy="12" r="10" />
 				</svg>
 			);
@@ -216,18 +391,32 @@ function ChoiceButton({ choice, isSelected, submitted, onClick, disabled }: Choi
 		return null;
 	};
 
+	// Determine background based on state
+	const getBackgroundClass = () => {
+		if (submitted) {
+			if (choice.is_correct) {
+				return 'bg-green-500/20 border-green-500/50';
+			} else if (isSelected) {
+				return 'bg-red-500/20 border-red-500/50';
+			}
+			return 'bg-white/5 border-white/10';
+		}
+		if (isSelected) {
+			return 'bg-purple-500/20 border-purple-500/50';
+		}
+		return 'bg-white/5 border-white/10 hover:bg-white/10';
+	};
+
 	return (
-		<button
+		<motion.button
+			whileHover={!disabled ? { scale: 1.01 } : {}}
+			whileTap={!disabled ? { scale: 0.99 } : {}}
 			onClick={onClick}
 			disabled={disabled}
-			className={`w-full flex items-center justify-between p-4 rounded-xl text-left transition-all ${
-				isSelected
-					? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500'
-					: 'bg-gray-100 dark:bg-gray-700 border-2 border-transparent hover:bg-gray-200 dark:hover:bg-gray-600'
-			} ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+			className={`w-full flex items-center justify-between p-4 rounded-xl text-left transition-all border-2 ${getBackgroundClass()} ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
 		>
-			<span className="text-gray-900 dark:text-white flex-1 pr-4">{choice.choice_text}</span>
+			<span className="text-white flex-1 pr-4">{choice.choice_text}</span>
 			<span className="flex-shrink-0">{getIcon()}</span>
-		</button>
+		</motion.button>
 	);
 }
