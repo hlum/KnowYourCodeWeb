@@ -31,7 +31,7 @@ export function ClassItemView({ classData, onClick }: ClassItemViewProps) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-shadow cursor-pointer mx-4"
+      className="flex items-center w-full p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
     >
       {/* Icon with first character */}
       <div
