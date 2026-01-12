@@ -120,7 +120,7 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 				<header className="flex items-center gap-4 mb-6">
 					{mode === 'review' && (
 						<button
-							onClick={() => navigate(-1)}
+							onClick={() => navigate(getHomeworkDetailPath(homeworkId), { replace: true })}
 							className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
 						>
 							<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
