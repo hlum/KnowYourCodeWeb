@@ -47,14 +47,22 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 		isLastQuestion,
 		isLoading,
 		error,
+		isAlreadyCompleted,
 		questionIdAndSelectedChoiceId,
 		postAnswer,
 		goToNext,
 	} = useQuestionsViewModel(user, homeworkId || '', mode);
 
+	// Redirect if quiz is already completed (prevent retaking)
+	useEffect(() => {
+		if (mode === 'answering' && isAlreadyCompleted && homeworkId) {
+			navigate(getHomeworkDetailPath(homeworkId), { replace: true });
+		}
+	}, [mode, isAlreadyCompleted, homeworkId, navigate]);
+
 	// Prevent back navigation during answering mode
 	useEffect(() => {
-		if (mode === 'answering') {
+		if (mode === 'answering' && !isAlreadyCompleted) {
 			const handlePopState = (e: PopStateEvent) => {
 				e.preventDefault();
 				// Push state back to prevent navigation
@@ -69,7 +77,7 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 				window.removeEventListener('popstate', handlePopState);
 			};
 		}
-	}, [mode]);
+	}, [mode, isAlreadyCompleted]);
 
 	// Post initial empty answer when starting to answer (to record that answering has started)
 	useEffect(() => {

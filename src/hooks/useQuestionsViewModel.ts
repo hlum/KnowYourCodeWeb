@@ -11,9 +11,25 @@ export function useQuestionsViewModel(user: User, homeworkId: string, mode: Ques
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [isAlreadyCompleted, setIsAlreadyCompleted] = useState(false);
 
 	// For review mode: map of questionId -> selectedChoiceId
 	const [questionIdAndSelectedChoiceId, setQuestionIdAndSelectedChoiceId] = useState<Record<string, string | null>>({});
+
+	// Check if already completed (has answers with selected choices)
+	const checkIfCompleted = useCallback(async () => {
+		if (mode !== 'answering') return;
+		
+		try {
+			const answers = await answerApi.fetchAnswers(homeworkId, user.uid);
+			// If any answer has a selected choice, quiz was completed
+			const hasCompletedAnswers = answers.some((a: Answer) => a.selected_choice_id != null);
+			setIsAlreadyCompleted(hasCompletedAnswers);
+		} catch {
+			// No answers found means not completed
+			setIsAlreadyCompleted(false);
+		}
+	}, [homeworkId, user.uid, mode]);
 
 	// Load all questions with choices
 	const loadQuestions = useCallback(async () => {
@@ -45,8 +61,9 @@ export function useQuestionsViewModel(user: User, homeworkId: string, mode: Ques
 	}, [homeworkId, user.uid]);
 
 	useEffect(() => {
+		checkIfCompleted();
 		loadQuestions();
-	}, [loadQuestions]);
+	}, [checkIfCompleted, loadQuestions]);
 
 	useEffect(() => {
 		if (mode === 'review' && questionsWithChoices.length > 0) {
@@ -89,6 +106,7 @@ export function useQuestionsViewModel(user: User, homeworkId: string, mode: Ques
 		isLastQuestion,
 		isLoading,
 		error,
+		isAlreadyCompleted,
 		questionIdAndSelectedChoiceId,
 		postAnswer,
 		goToNext,
