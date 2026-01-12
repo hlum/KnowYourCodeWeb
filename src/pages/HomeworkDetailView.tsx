@@ -2,6 +2,7 @@ import type { User } from "firebase/auth";
 import { useParams, useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import { useHomeworkDetailViewModel } from "../hooks/useHomeworkDetailViewModel";
+import { getHomeworkQuestionsPath } from "../router/paths";
 import nekoThinkingAnimation from "../assets/nekoThinking.json";
 import aiAnimation from "../assets/AI.json";
 
@@ -264,7 +265,7 @@ function QuestionGeneratedState({ homeworkId }: QuestionGeneratedStateProps) {
 	return (
 		<button
 			onClick={() => {
-				navigate(`/homeworks/${homeworkId}/questions`);
+				navigate(getHomeworkQuestionsPath(homeworkId));
 			}}
 			className="w-full py-4 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-full flex items-center justify-center gap-2 transition-colors"
 		>
@@ -313,7 +314,7 @@ function CompletedState({ homeworkId }: CompletedStateProps) {
 	return (
 		<button
 			onClick={() => {
-				navigate(`/homeworks/${homeworkId}/questions?mode=review`);
+				navigate(getHomeworkQuestionsPath(homeworkId, 'review'));
 			}}
 			className="w-full py-4 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-full transition-colors"
 		>
