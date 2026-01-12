@@ -265,7 +265,8 @@ function QuestionGeneratedState({ homeworkId }: QuestionGeneratedStateProps) {
 	return (
 		<button
 			onClick={() => {
-				navigate(getHomeworkQuestionsPath(homeworkId));
+				// Use replace to prevent going back to quiz after completion
+				navigate(getHomeworkQuestionsPath(homeworkId), { replace: true });
 			}}
 			className="w-full py-4 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-full flex items-center justify-center gap-2 transition-colors"
 		>
