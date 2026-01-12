@@ -1,7 +1,9 @@
 import type { User } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { useHomeViewModel } from "../hooks/useHomeViewModel";
 import { ClassItemView } from "../components/ClassItemView";
 import { HomeworkItemView } from "../components/HomeworkItemView";
+import { getClassHomeworksPath } from "../router/paths";
 
 interface HomeViewProps {
 	user: User;
@@ -45,6 +47,7 @@ function HomeSkeleton() {
 }
 
 export function HomeView({ user }: HomeViewProps) {
+	const navigate = useNavigate();
 	const { userData, classes, homeworks, isLoading, error, refresh } = useHomeViewModel(user);
 
 	if (isLoading) {
@@ -100,7 +103,7 @@ export function HomeView({ user }: HomeViewProps) {
 									<ClassItemView
 										classData={classItem}
 										onClick={() => {
-											console.log("Navigate to class:", classItem.id);
+											navigate(getClassHomeworksPath(classItem.id));
 										}}
 									/>
 								</div>
