@@ -40,6 +40,7 @@ function ProfileViewSkeleton() {
 
 export function ProfileView({ user }: ProfileViewProps) {
 	const {
+		userData,
 		isLoading,
 		currentYear,
 		averageResultsPerMonth,
@@ -56,11 +57,10 @@ export function ProfileView({ user }: ProfileViewProps) {
 		await authManager.signOut();
 	};
 
-	// Get photoURL from Google provider
-	const googleProvider = user.providerData.find((provider) => provider.providerId === "google.com");
-	const photoURL = googleProvider?.photoURL || user.photoURL;
-	const displayName = user.displayName || "ユーザー";
-	const email = user.email || "";
+	// Get profile data from API or fallback to Firebase user
+	const photoURL = userData?.photo_url || user.photoURL;
+	const displayName = userData?.name || user.displayName || "ユーザー";
+	const email = userData?.email || user.email || "";
 
 	// Prepare chart data for all 12 months
 	const chartData = Array.from({ length: 12 }, (_, i) => {

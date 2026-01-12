@@ -56,9 +56,8 @@ export function HomeView({ user }: HomeViewProps) {
 	}
 
 	const displayName = userData?.student_code || userData?.name || user.displayName || "ゲスト";
-	// Get photoURL from Google provider or userData
-	const googleProvider = user.providerData.find((provider) => provider.providerId === "google.com");
-	const photoURL = userData?.photo_url || googleProvider?.photoURL || user.photoURL;
+	// Get photoURL from API or fallback to Firebase user
+	const photoURL = userData?.photo_url || user.photoURL;
 
 	return (
 		<div className="page-bg min-h-screen">

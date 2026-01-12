@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { User } from 'firebase/auth';
 import { resultApi } from '../api/resultApi';
-import type { ResultData } from '../types/models';
+import { userApi } from '../api/userApi';
+import type { ResultData, UserData } from '../types/models';
 
 export interface AverageResultPerMonth {
 	month: Date;
@@ -9,28 +10,46 @@ export interface AverageResultPerMonth {
 }
 
 export function useProfileViewModel(user: User) {
+	const [userData, setUserData] = useState<UserData | null>(null);
 	const [results, setResults] = useState<ResultData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+	const loadUserData = useCallback(async () => {
+		try {
+			const data = await userApi.fetchUserData(user.uid);
+			setUserData(data);
+		} catch (err) {
+			console.error('Failed to load user data:', err);
+		}
+	}, [user.uid]);
+
 	const loadResults = useCallback(async () => {
-		setIsLoading(true);
-		setError(null);
 		try {
 			const data = await resultApi.fetchResults(user.uid);
 			setResults(data);
 		} catch (err) {
 			// No results is not an error for this view
 			setResults([]);
-		} finally {
-			setIsLoading(false);
 		}
 	}, [user.uid]);
 
+	const loadAll = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		try {
+			await Promise.all([loadUserData(), loadResults()]);
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'データの取得に失敗しました');
+		} finally {
+			setIsLoading(false);
+		}
+	}, [loadUserData, loadResults]);
+
 	useEffect(() => {
-		loadResults();
-	}, [loadResults]);
+		loadAll();
+	}, [loadAll]);
 
 	// Calculate average results per month for the current year
 	const averageResultsPerMonth = useMemo((): AverageResultPerMonth[] => {
@@ -71,6 +90,7 @@ export function useProfileViewModel(user: User) {
 	}, []);
 
 	return {
+		userData,
 		results,
 		isLoading,
 		error,
@@ -80,6 +100,6 @@ export function useProfileViewModel(user: User) {
 		completedHomeworkCount: results.length,
 		goToPreviousYear,
 		goToNextYear,
-		refresh: loadResults,
+		refresh: loadAll,
 	};
 }
