@@ -1,6 +1,8 @@
 import type { User } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { useHomeworkListViewModel, FILTER_OPTIONS, type HomeworkFilterOption } from "../hooks/useHomeworkListViewModel";
 import { HomeworkItemView } from "../components/HomeworkItemView";
+import { getHomeworkDetailPath } from "../router/paths";
 
 interface HomeworkListViewProps {
 	user: User;
@@ -38,6 +40,7 @@ function FilterButton({ label, isSelected, onClick }: FilterButtonProps) {
 }
 
 export function HomeworkListView({ user }: HomeworkListViewProps) {
+	const navigate = useNavigate();
 	const {
 		filteredHomeworks,
 		isLoading,
@@ -127,7 +130,7 @@ export function HomeworkListView({ user }: HomeworkListViewProps) {
 								key={homework.id}
 								homework={homework}
 								onClick={() => {
-									console.log("Navigate to homework:", homework.id);
+									navigate(getHomeworkDetailPath(homework.id));
 								}}
 								onAnswerClick={() => {
 									console.log("Answer homework:", homework.id);

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useHomeViewModel } from "../hooks/useHomeViewModel";
 import { ClassItemView } from "../components/ClassItemView";
 import { HomeworkItemView } from "../components/HomeworkItemView";
-import { getClassHomeworksPath } from "../router/paths";
+import { getClassHomeworksPath, getHomeworkDetailPath } from "../router/paths";
 
 interface HomeViewProps {
 	user: User;
@@ -145,7 +145,7 @@ export function HomeView({ user }: HomeViewProps) {
 									key={homework.id}
 									homework={homework}
 									onClick={() => {
-										console.log("Navigate to homework:", homework.id);
+										navigate(getHomeworkDetailPath(homework.id));
 									}}
 									onAnswerClick={() => {
 										console.log("Answer homework:", homework.id);

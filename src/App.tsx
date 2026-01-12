@@ -4,6 +4,7 @@ import { HomeView } from './pages/HomeView';
 import { ClassListView } from './pages/ClassListView';
 import { ClassHomeworkListView } from './pages/ClassHomeworkListView';
 import { HomeworkListView } from './pages/HomeworkListView';
+import { HomeworkDetailView } from './pages/HomeworkDetailView';
 import { ProfileView } from './pages/ProfileView';
 import { Loading } from './components/Loading';
 import { MainLayout } from './components/MainLayout';
@@ -73,6 +74,16 @@ function App() {
               <ProtectedRoute>
                 {(user, authenticating) =>
                   authenticating ? <Loading /> : <HomeworkListView user={user} />
+                }
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={Paths.HOMEWORK_DETAIL}
+            element={
+              <ProtectedRoute>
+                {(user, authenticating) =>
+                  authenticating ? <Loading /> : <HomeworkDetailView user={user} />
                 }
               </ProtectedRoute>
             }

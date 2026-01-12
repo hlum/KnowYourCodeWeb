@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useClassHomeworkViewModel } from "../hooks/useClassHomeworkViewModel";
 import { FILTER_OPTIONS, type HomeworkFilterOption } from "../hooks/useHomeworkListViewModel";
 import { HomeworkItemView } from "../components/HomeworkItemView";
+import { getHomeworkDetailPath } from "../router/paths";
 
 interface ClassHomeworkListViewProps {
 	user: User;
@@ -113,7 +114,7 @@ export function ClassHomeworkListView({ user }: ClassHomeworkListViewProps) {
 								key={homework.id}
 								homework={homework}
 								onClick={() => {
-									console.log("Navigate to homework:", homework.id);
+									navigate(getHomeworkDetailPath(homework.id));
 								}}
 								onAnswerClick={() => {
 									console.log("Answer homework:", homework.id);
