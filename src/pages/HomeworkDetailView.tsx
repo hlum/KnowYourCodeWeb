@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { User } from "firebase/auth";
 import { useParams, useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
@@ -53,6 +54,24 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 		retryQuestionGeneration,
 		cancelHomeworkSubmission,
 	} = useHomeworkDetailViewModel(user, homeworkId || "");
+
+	// Refresh data when page becomes visible (e.g., after returning from quiz)
+	useEffect(() => {
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				refresh();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		
+		// Also refresh on mount in case we navigated back
+		refresh();
+
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [refresh]);
 
 	if (!homeworkId) {
 		return (
