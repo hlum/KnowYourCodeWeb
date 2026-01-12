@@ -35,8 +35,143 @@
 	}
 }
 
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+@keyframes glow-pulse {
+	0%, 100% {
+		box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+	}
+	50% {
+		box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+	}
+}
+
+@keyframes gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
 .animate-fade-in {
 	animation: fade-in 0.5s ease-in-out forwards;
+}
+
+.animate-float {
+	animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+	animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+	background-size: 200% 200%;
+	animation: gradient-shift 8s ease infinite;
+}
+
+/* Dark login page background */
+@utility login-bg {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 25%, #16213e 50%, #0f0f1a 100%);
+	position: relative;
+	overflow: hidden;
+}
+
+/* Glassmorphism card for dark mode */
+@utility glass-card {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 1.5rem;
+}
+
+@utility glass-card-hover {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 1.5rem;
+	transition: all 0.3s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.08);
+		border-color: rgba(139, 92, 246, 0.3);
+		box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+	}
+}
+
+/* Gradient text */
+@utility text-gradient {
+	background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+@utility text-gradient-pink {
+	background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* Gradient button */
+@utility btn-gradient {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+	background-size: 200% 200%;
+	color: white;
+	font-weight: 600;
+	padding: 1rem 2rem;
+	border-radius: 0.75rem;
+	transition: all 0.3s ease;
+	animation: gradient-shift 4s ease infinite;
+
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+}
+
+/* Outline button for dark mode */
+@utility btn-outline-dark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	background: transparent;
+	color: white;
+	font-weight: 500;
+	padding: 0.875rem 1.5rem;
+	border-radius: 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	transition: all 0.3s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.4);
+	}
 }
 
 /* Reusable component classes using @utility */
