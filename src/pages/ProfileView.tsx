@@ -56,7 +56,9 @@ export function ProfileView({ user }: ProfileViewProps) {
 		await authManager.signOut();
 	};
 
-	const photoURL = user.photoURL;
+	// Get photoURL from Google provider
+	const googleProvider = user.providerData.find((provider) => provider.providerId === "google.com");
+	const photoURL = googleProvider?.photoURL || user.photoURL;
 	const displayName = user.displayName || "ユーザー";
 	const email = user.email || "";
 
