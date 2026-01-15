@@ -6,6 +6,7 @@ import { classApi } from '../api/classApi';
 import { projectApi } from '../api/projectApi';
 import { resultApi } from '../api/resultApi';
 import { LollipopError } from '../api/errors';
+import { validateSubmissionUrl } from '../utils/urlValidation';
 
 export function useHomeworkDetailViewModel(user: User, homeworkId: string) {
 	const [homework, setHomework] = useState<HomeworkWithStatus | null>(null);
@@ -73,6 +74,14 @@ export function useHomeworkDetailViewModel(user: User, homeworkId: string) {
 
 		setIsSubmitting(true);
 		setInputErrorMessage('');
+
+		// Client-side validation
+		const validationResult = validateSubmissionUrl(homeworkLinkTxt.trim());
+		if (!validationResult.isValid) {
+			setInputErrorMessage(validationResult.error || '無効なURLです。');
+			setIsSubmitting(false);
+			return;
+		}
 
 		try {
 			await projectApi.uploadProject(user.uid, homeworkId, homeworkLinkTxt.trim());

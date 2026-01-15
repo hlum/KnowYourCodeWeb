@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import { useHomeworkDetailViewModel } from "../hooks/useHomeworkDetailViewModel";
 import { getHomeworkQuestionsPath } from "../router/paths";
+import { validateSubmissionUrl } from "../utils/urlValidation";
 import nekoThinkingAnimation from "../assets/nekoThinking.json";
 import aiAnimation from "../assets/AI.json";
 
@@ -257,6 +258,30 @@ function NotAssignedState({
 	inputErrorMessage,
 	onSubmit,
 }: NotAssignedStateProps) {
+	const [realtimeError, setRealtimeError] = useState<string>("");
+
+	const handleInputChange = (value: string) => {
+		setHomeworkLinkTxt(value);
+
+		// Clear realtime error when input is empty
+		if (!value.trim()) {
+			setRealtimeError("");
+			return;
+		}
+
+		// Validate in real-time
+		const validation = validateSubmissionUrl(value);
+		if (!validation.isValid) {
+			setRealtimeError(validation.error || "");
+		} else {
+			setRealtimeError("");
+		}
+	};
+
+	// Show either submission error or realtime validation error
+	const displayError = inputErrorMessage || realtimeError;
+	const hasValidationError = !homeworkLinkTxt.trim() || !!realtimeError;
+
 	return (
 		<div className="space-y-4">
 			<h3 className="text-lg font-semibold text-white">
@@ -266,32 +291,42 @@ function NotAssignedState({
 			<input
 				type="url"
 				value={homeworkLinkTxt}
-				onChange={(e) => setHomeworkLinkTxt(e.target.value)}
-				placeholder="例: https://github.com/your-username/your-repository"
+				onChange={(e) => handleInputChange(e.target.value)}
+				placeholder="例: https://github.com/username/repository"
 				className="w-full px-5 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
 				disabled={isSubmitting}
 			/>
 
-			<div className="flex items-start gap-2 text-gray-400 text-sm">
-				<svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-				</svg>
-				<span>
-					Google Driveで提出する場合は、ファイルを圧縮し、「リンクを知っている全員がアクセス可能」に設定してください。
-				</span>
+			<div className="space-y-2">
+				<div className="flex items-start gap-2 text-gray-400 text-sm">
+					<svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>
+						GitHubの場合は、リポジトリのHTTPS URLを入力してください（git cloneで使用できる形式）。
+					</span>
+				</div>
+				<div className="flex items-start gap-2 text-gray-400 text-sm">
+					<svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>
+						Google Driveの場合は、ファイルを圧縮し、「リンクを知っている全員がアクセス可能」に設定してください。
+					</span>
+				</div>
 			</div>
 
-			{inputErrorMessage && (
-				<p className="text-red-400 text-sm">{inputErrorMessage}</p>
+			{displayError && (
+				<p className="text-red-400 text-sm">{displayError}</p>
 			)}
 
 			<motion.button
 				whileHover={{ scale: 1.02 }}
 				whileTap={{ scale: 0.98 }}
 				onClick={onSubmit}
-				disabled={!homeworkLinkTxt.trim() || isSubmitting}
+				disabled={hasValidationError || isSubmitting}
 				className={`w-full py-4 font-semibold rounded-full transition-all ${
-					!homeworkLinkTxt.trim() || isSubmitting
+					hasValidationError || isSubmitting
 						? "bg-white/10 text-gray-500 cursor-not-allowed"
 						: "btn-gradient"
 				}`}
