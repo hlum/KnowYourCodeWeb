@@ -1,7 +1,7 @@
 import type { User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { authManager } from "../firebase/authManager";
+import { authManager } from "../managers/authManager";
 import { useProfileViewModel } from "../hooks/useProfileViewModel";
 import { Paths } from "../router/paths";
 import defaultProfilePic from "../assets/profilePic.jpg";

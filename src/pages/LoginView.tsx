@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import appLogo from "../assets/appLogo.png";
 import googleIcon from "../assets/google.png";
-import { authManager } from "../firebase/authManager";
+import { authManager } from "../managers/authManager";
 
 // Animation variants
 const containerVariants: Variants = {

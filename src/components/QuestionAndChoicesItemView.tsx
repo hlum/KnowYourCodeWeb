@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { QuestionWithChoices, Choice } from '../types/models';
 import type { QuestionViewMode } from '../hooks/useQuestionsViewModel';
+import { remoteConfigManager } from '../managers/remoteConfigManager';
 
 interface QuestionAndChoicesItemViewProps {
 	questionAndChoices: QuestionWithChoices;
@@ -10,9 +11,6 @@ interface QuestionAndChoicesItemViewProps {
 	onClickNext?: (selectedChoiceId: string | null) => void;
 	selectedChoiceIdFromServer?: string | null; // for review mode
 }
-
-const MAIN_TIMER_DURATION = 20; // seconds for main timer
-const ARC_TIMER_DURATION = 10; // seconds for arc timer button
 
 // Arc Timer Button Component - uses requestAnimationFrame for smooth animation
 interface ArcTimerButtonProps {
@@ -141,6 +139,10 @@ export function QuestionAndChoicesItemView({
 	onClickNext,
 	selectedChoiceIdFromServer,
 }: QuestionAndChoicesItemViewProps) {
+	// Get timer durations from Remote Config
+	const MAIN_TIMER_DURATION = remoteConfigManager.mainTimerDuration;
+	const ARC_TIMER_DURATION = remoteConfigManager.arcTimerDuration;
+
 	const [remainingTime, setRemainingTime] = useState(MAIN_TIMER_DURATION);
 	const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
@@ -175,7 +177,7 @@ export function QuestionAndChoicesItemView({
 		setSelectedChoiceId(null);
 		setSubmitted(false);
 		setArcTimerReset((prev) => prev + 1);
-		
+
 		timerRef.current = setInterval(() => {
 			setRemainingTime((prev) => {
 				if (prev <= 1) {
@@ -190,7 +192,7 @@ export function QuestionAndChoicesItemView({
 				return prev - 1;
 			});
 		}, 1000);
-	}, [stopTimer]);
+	}, [stopTimer, MAIN_TIMER_DURATION]);
 
 	const startTimer = useCallback(() => {
 		stopTimer();
@@ -209,7 +211,7 @@ export function QuestionAndChoicesItemView({
 				return prev - 1;
 			});
 		}, 1000);
-	}, [stopTimer]);
+	}, [stopTimer, MAIN_TIMER_DURATION]);
 
 	useEffect(() => {
 		if (mode === 'answering') {
@@ -226,7 +228,7 @@ export function QuestionAndChoicesItemView({
 			setRemainingTime(MAIN_TIMER_DURATION);
 			setArcTimerReset((prev) => prev + 1);
 		}
-	}, [questionAndChoices.question_id, mode]);
+	}, [questionAndChoices.question_id, mode, MAIN_TIMER_DURATION]);
 
 	const handleChoiceClick = (choiceId: string) => {
 		if (mode === 'answering' && !submitted) {
@@ -255,7 +257,7 @@ export function QuestionAndChoicesItemView({
 			setSelectedChoiceId(null);
 			setSubmitted(false);
 		}
-	}, [isLastQuestion]);
+	}, [isLastQuestion, MAIN_TIMER_DURATION]);
 
 	const isChoiceSelected = (choice: Choice) => {
 		if (mode === 'answering') {

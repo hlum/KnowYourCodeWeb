@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LoginView } from './pages/LoginView';
 import { HomeView } from './pages/HomeView';
@@ -13,8 +14,14 @@ import { MainLayout } from './components/MainLayout';
 import { GuestRoute } from './router/GuestRoute';
 import { ProtectedRoute } from './router/ProtectedRoute';
 import { Paths } from './router/paths';
+import { remoteConfigManager } from './managers/remoteConfigManager';
 
 function App() {
+  // Fetch Remote Config on app startup
+  useEffect(() => {
+    remoteConfigManager.fetchRemoteConfig();
+  }, []);
+
   return (
     <div className="w-full mx-auto min-h-screen app-bg">
       <Routes>
