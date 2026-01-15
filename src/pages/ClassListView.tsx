@@ -78,17 +78,17 @@ function AddClassModal({
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
-			className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+			className="fixed inset-0 z-50 flex items-center justify-center p-4"
 		>
 			{/* Backdrop */}
-			<div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+			<div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0" onClick={onClose} />
 
 			{/* Modal */}
 			<motion.div
 				initial={{ opacity: 0, y: 50, scale: 0.95 }}
 				animate={{ opacity: 1, y: 0, scale: 1 }}
 				transition={{ duration: 0.3 }}
-				className="relative w-full sm:max-w-md glass-card rounded-t-2xl sm:rounded-2xl p-6"
+				className="relative w-full max-w-md glass-card rounded-2xl p-6 z-10"
 			>
 				<h2 className="text-xl font-bold text-white mb-2">
 					クラスコードを入力して参加
