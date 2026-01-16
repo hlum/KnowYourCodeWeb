@@ -109,6 +109,9 @@ export function MainLayout() {
 	const navRef = useRef<HTMLUListElement>(null);
 	const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
+	// Check if we're on the questions page (hide bottom nav during test)
+	const isOnQuestionsPage = location.pathname.includes('/questions');
+
 	// Find active index based on current path
 	useEffect(() => {
 		const index = navItems.findIndex((item) => {
@@ -147,12 +150,13 @@ export function MainLayout() {
 	return (
 		<div className="flex flex-col min-h-screen">
 			{/* Main content area */}
-			<main className="flex-1 pb-24">
+			<main className={`flex-1 ${isOnQuestionsPage ? 'pb-0' : 'pb-24'}`}>
 				<Outlet />
 			</main>
 
 			{/* Bottom navigation - Glass Style */}
-			<nav className="fixed bottom-4 left-4 right-4 z-50">
+			{!isOnQuestionsPage && (
+				<nav className="fixed bottom-4 left-4 right-4 z-50">
 				<div className="max-w-md mx-auto">
 					<div className="relative bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[28px] shadow-2xl shadow-black/40 overflow-visible">
 						{/* Inner glass reflection */}
@@ -217,6 +221,7 @@ export function MainLayout() {
 					</div>
 				</div>
 			</nav>
+			)}
 		</div>
 	);
 }
