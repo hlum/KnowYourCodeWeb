@@ -3,8 +3,9 @@ import { motion, useScroll, useTransform, useSpring, useInView } from "framer-mo
 import appLogo from "../assets/appLogo.png";
 import googleIcon from "../assets/google.png";
 import { authManager } from "../managers/authManager";
-import { ThreadsBackground } from "../components/ThreadsBackground";
+import DarkVeil from "../components/DarkVeil";
 import GlassSurface from "../components/GlassSurface";
+import SplashCursor from "../components/SplashCursor";
 
 // Feature data
 const features = [
@@ -49,51 +50,57 @@ const features = [
 // 3D Rotating Feature Card Component with Z-axis rotation and tilt
 function FeatureCard({ feature, index }: { feature: (typeof features)[0]; index: number }) {
 	const cardRef = useRef<HTMLDivElement>(null);
-	const isInView = useInView(cardRef, { once: false, margin: "-100px" });
-	const [scrollProgress, setScrollProgress] = useState(0);
+	const isInView = useInView(cardRef, { once: true, margin: "-100px" });
 
-	useEffect(() => {
-		const handleScroll = () => {
-			if (!cardRef.current) return;
-			const rect = cardRef.current.getBoundingClientRect();
-			const windowHeight = window.innerHeight;
-			const progress = 1 - rect.top / windowHeight;
-			setScrollProgress(Math.max(0, Math.min(1, progress)));
-		};
-
-		window.addEventListener("scroll", handleScroll);
-		handleScroll();
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
-
-	// Z-axis rotation based on scroll
-	const rotateZ = (scrollProgress - 0.5) * 30;
-	const scale = 0.9 + scrollProgress * 0.1;
-
-	// Slight tilt on X and Y axes
-	const tiltX = -5;
-	const tiltY = 5;
+	// Static rotation values - no continuous scroll tracking
+	const rotateZ = ((index % 3) - 1) * 5; // Slight rotation variation per card
+	const tiltX = -3;
+	const tiltY = 3;
 
 	return (
 		<motion.div
 			ref={cardRef}
-			initial={{ opacity: 0, y: 100 }}
-			animate={isInView ? { opacity: 1, y: 0 } : {}}
-			transition={{ duration: 0.6, delay: index * 0.1 }}
+			initial={{ opacity: 0, y: 100, scale: 0.9 }}
+			animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+			transition={{
+				duration: 0.7,
+				delay: index * 0.1,
+				ease: [0.22, 1, 0.36, 1],
+			}}
 			style={{
 				perspective: "1500px",
 			}}
 			className="group"
 		>
 			<motion.div
+				initial={{
+					rotateX: 0,
+					rotateY: 0,
+					rotateZ: 0,
+				}}
+				animate={
+					isInView
+						? {
+								rotateX: tiltX,
+								rotateY: tiltY,
+								rotateZ: rotateZ,
+						  }
+						: {}
+				}
+				transition={{
+					type: "spring",
+					stiffness: 80,
+					damping: 25,
+					delay: index * 0.1 + 0.2,
+				}}
+				whileHover={{
+					rotateX: tiltX * 1.5,
+					rotateY: tiltY * 1.5,
+					scale: 1.02,
+				}}
 				style={{
-					rotateX: isInView ? tiltX : 0,
-					rotateY: isInView ? tiltY : 0,
-					rotateZ: isInView ? rotateZ : 0,
-					scale: isInView ? scale : 0.9,
 					transformStyle: "preserve-3d",
 				}}
-				transition={{ type: "spring", stiffness: 100, damping: 20 }}
 				className="relative glass-card p-8 hover:shadow-2xl hover:shadow-purple-500/20 transition-shadow duration-300"
 			>
 				{/* Gradient indicator bar */}
@@ -154,11 +161,15 @@ export function LoginView() {
 	return (
 		<div className="relative min-h-screen bg-black overflow-hidden">
 			{/* Threads Background */}
-			<ThreadsBackground />
-
+			{/* Background Effects */}
+			<div className="absolute inset-0 z-0 pointer-events-none">
+				<SplashCursor />
+				{/* <LiquidEther /> */}
+				{/* <GradientBlinds /> */}
+				<DarkVeil speed={3} hueShift={46} warpAmount={5} />
+			</div>{" "}
 			{/* Progress bar */}
 			<motion.div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 origin-left z-50" style={{ scaleX }} />
-
 			{/* Fixed Header with Sign In Button */}
 			<motion.header initial={{ y: -100 }} animate={{ y: 0 }} className="fixed top-1 left-0 right-0 z-40 px-6 py-4">
 				<div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -169,7 +180,7 @@ export function LoginView() {
 					</motion.div>
 
 					{/* Sign In Button */}
-					<button onClick={handleGoogleSignIn} disabled={isLoading}>
+					<motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleGoogleSignIn} disabled={isLoading}>
 						<GlassSurface width={150} height={55}>
 							{isLoading ? (
 								<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -178,17 +189,15 @@ export function LoginView() {
 							)}
 							<span className="text-white font-medium">{isLoading ? "ログイン中..." : "サインイン"}</span>
 						</GlassSurface>
-					</button>
+					</motion.button>
 				</div>
 			</motion.header>
-
 			{/* Animated background blobs */}
 			<div className="fixed inset-0 pointer-events-none">
 				<ParallaxShape className="absolute top-20 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" speed={0.3} />
 				<ParallaxShape className="absolute top-1/2 right-20 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" speed={0.5} />
 				<ParallaxShape className="absolute bottom-20 left-1/3 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-3xl" speed={0.4} />
 			</div>
-
 			{/* Error Alert */}
 			{error && (
 				<motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="fixed top-20 left-1/2 transform -translate-x-1/2 glass-card px-6 py-4 z-50 border-red-500/30">
@@ -207,7 +216,6 @@ export function LoginView() {
 					</div>
 				</motion.div>
 			)}
-
 			<div className="relative z-10">
 				{/* Hero Section */}
 				<section className="min-h-screen flex flex-col items-center justify-center px-6 py-20">
@@ -290,7 +298,7 @@ export function LoginView() {
 									}}
 									className="glass-card p-8 flex items-center gap-8"
 								>
-									<div className="text-6xl font-black text-purple-500/30">{item.step}</div>
+									<div className="text-6xl font-black text-purple-500">{item.step}</div>
 									<div>
 										<h3 className="text-3xl font-bold text-white mb-2">{item.title}</h3>
 										<p className="text-gray-400 text-lg">{item.desc}</p>
