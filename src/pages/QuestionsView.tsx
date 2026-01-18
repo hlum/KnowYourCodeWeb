@@ -1,10 +1,11 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuestionsViewModel, type QuestionViewMode } from '../hooks/useQuestionsViewModel';
 import { QuestionAndChoicesItemView } from '../components/QuestionAndChoicesItemView';
 import { getHomeworkDetailPath } from '../router/paths';
+import { TestExplanationView, TestExplanationPreference } from '../components/TestExplanationView';
 
 interface QuestionsViewProps {
 	user: User;
@@ -66,6 +67,11 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 
 	const mode: QuestionViewMode = searchParams.get('mode') === 'review' ? 'review' : 'answering';
 
+	// Check if we should show explanation (only for answering mode)
+	const [showExplanation, setShowExplanation] = useState(
+		mode === 'answering' && TestExplanationPreference.shouldShowExplanation()
+	);
+
 	const {
 		questionsWithChoices,
 		currentQuestion,
@@ -86,9 +92,9 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 		}
 	}, [mode, isAlreadyCompleted, homeworkId, navigate]);
 
-	// Prevent back navigation during answering mode
+	// Prevent back navigation during answering mode (but allow during explanation)
 	useEffect(() => {
-		if (mode === 'answering' && !isAlreadyCompleted) {
+		if (mode === 'answering' && !isAlreadyCompleted && !showExplanation) {
 			const handlePopState = (e: PopStateEvent) => {
 				e.preventDefault();
 				// Push state back to prevent navigation
@@ -103,14 +109,15 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 				window.removeEventListener('popstate', handlePopState);
 			};
 		}
-	}, [mode, isAlreadyCompleted]);
+	}, [mode, isAlreadyCompleted, showExplanation]);
 
 	// Post initial empty answer when starting to answer (to record that answering has started)
+	// Only after explanation is dismissed
 	useEffect(() => {
-		if (mode === 'answering' && currentQuestion) {
+		if (mode === 'answering' && currentQuestion && !showExplanation) {
 			postAnswer(currentQuestion.question_id, null);
 		}
-	}, [mode, currentQuestion?.question_id, postAnswer]);
+	}, [mode, currentQuestion?.question_id, postAnswer, showExplanation]);
 
 	const handleNext = useCallback(async (selectedChoiceId: string | null) => {
 		if (!currentQuestion || !homeworkId) return;
@@ -126,6 +133,22 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 			goToNext();
 		}
 	}, [currentQuestion, homeworkId, isLastQuestion, postAnswer, goToNext, navigate]);
+
+	// Show explanation view if needed
+	if (showExplanation) {
+		return (
+			<TestExplanationView
+				onDismiss={() => {
+					if (homeworkId) {
+						navigate(getHomeworkDetailPath(homeworkId), { replace: true });
+					}
+				}}
+				onStartTest={() => {
+					setShowExplanation(false);
+				}}
+			/>
+		);
+	}
 
 	if (!homeworkId) {
 		return (
