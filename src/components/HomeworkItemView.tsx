@@ -123,7 +123,7 @@ export function HomeworkItemView({
               e.stopPropagation();
               onAnswerClick();
             }}
-            className="ml-4 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+            className="ml-4 px-5 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20"
           >
             回答
           </button>

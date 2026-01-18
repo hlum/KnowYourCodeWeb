@@ -5,16 +5,7 @@ import { authManager } from "../managers/authManager";
 import { useProfileViewModel } from "../hooks/useProfileViewModel";
 import { Paths } from "../router/paths";
 import defaultProfilePic from "../assets/profilePic.jpg";
-import {
-	BarChart,
-	Bar,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	ResponsiveContainer,
-	Cell,
-	ReferenceLine,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 import { useState } from "react";
 
 interface ProfileViewProps {
@@ -31,22 +22,8 @@ function CustomScoreLabel({ viewBox, value }: CustomLabelProps) {
 	const x = viewBox?.x ?? 0;
 	return (
 		<g>
-			<rect
-				x={x - 28}
-				y={4}
-				width={56}
-				height={24}
-				rx={6}
-				fill="#a855f7"
-			/>
-			<text
-				x={x}
-				y={20}
-				textAnchor="middle"
-				fill="#fff"
-				fontSize={12}
-				fontWeight="bold"
-			>
+			<rect x={x - 28} y={4} width={56} height={24} rx={6} fill="#a855f7" />
+			<text x={x} y={20} textAnchor="middle" fill="#fff" fontSize={12} fontWeight="bold">
 				{value}
 			</text>
 		</g>
@@ -85,16 +62,7 @@ function ProfileViewSkeleton() {
 }
 
 export function ProfileView({ user }: ProfileViewProps) {
-	const {
-		userData,
-		isLoading,
-		currentYear,
-		averageResultsPerMonth,
-		averageScoreOfAllResults,
-		completedHomeworkCount,
-		goToPreviousYear,
-		goToNextYear,
-	} = useProfileViewModel(user);
+	const { userData, isLoading, currentYear, averageResultsPerMonth, averageScoreOfAllResults, completedHomeworkCount, goToPreviousYear, goToNextYear } = useProfileViewModel(user);
 
 	const navigate = useNavigate();
 	const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -110,9 +78,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 
 	// Prepare chart data for all 12 months
 	const chartData = Array.from({ length: 12 }, (_, i) => {
-		const monthData = averageResultsPerMonth.find(
-			(d) => d.month.getMonth() === i
-		);
+		const monthData = averageResultsPerMonth.find((d) => d.month.getMonth() === i);
 		return {
 			month: i + 1,
 			monthLabel: `${i + 1}`,
@@ -133,52 +99,31 @@ export function ProfileView({ user }: ProfileViewProps) {
 				<div className="absolute bottom-40 right-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
 			</div>
 
-			<motion.div
-				className="relative max-w-2xl mx-auto p-6 pt-8"
-				variants={containerVariants}
-				initial="hidden"
-				animate="visible"
-			>
+			<motion.div className="relative max-w-2xl mx-auto p-6 pt-8" variants={containerVariants} initial="hidden" animate="visible">
 				{/* Profile Basic Info */}
 				<motion.div variants={itemVariants} className="flex flex-col items-center mb-8">
 					<div className="relative">
-						<div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-lg opacity-50" />
-						<img
-							src={photoURL || defaultProfilePic}
-							alt="Profile"
-							className="relative w-32 h-32 rounded-full border-2 border-white/20 shadow-xl object-cover"
-						/>
+						<div className="absolute inset-0 bg-linear-to-r from-purple-500 to-pink-500 rounded-full blur-lg opacity-50" />
+						<img src={photoURL || defaultProfilePic} alt="Profile" className="relative w-32 h-32 rounded-full border-2 border-white/20 shadow-xl object-cover" />
 					</div>
-					<h2 className="text-2xl font-bold text-white mt-4">
-						{displayName}
-					</h2>
+					<h2 className="text-2xl font-bold text-white mt-4">{displayName}</h2>
 					<p className="text-gray-400">{email}</p>
 				</motion.div>
 
 				{/* Graph Section */}
 				<motion.div variants={itemVariants} className="mb-6">
-					<h3 className="text-xl font-bold text-white mb-4">
-						学業進捗
-					</h3>
+					<h3 className="text-xl font-bold text-white mb-4">学業進捗</h3>
 
 					<div className="glass-card p-4">
 						{/* Year Navigation */}
 						<div className="flex items-center justify-between mb-2">
-							<button
-								onClick={goToPreviousYear}
-								className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-							>
+							<button onClick={goToPreviousYear} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
 								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
 								</svg>
 							</button>
-							<span className="font-semibold text-white">
-								{currentYear}年
-							</span>
-							<button
-								onClick={goToNextYear}
-								className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-							>
+							<span className="font-semibold text-white">{currentYear}年</span>
+							<button onClick={goToNextYear} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
 								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 								</svg>
@@ -186,7 +131,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 						</div>
 
 						{/* Chart */}
-						<div className="h-52 w-full min-w-0 [&_*]:outline-none">
+						<div className="h-52 w-full min-w-0 **:outline-none">
 							{averageResultsPerMonth.length > 0 ? (
 								<ResponsiveContainer width="100%" height={208} minWidth={0}>
 									<BarChart data={chartData}>
@@ -201,15 +146,15 @@ export function ProfileView({ user }: ProfileViewProps) {
 										<XAxis dataKey="monthLabel" axisLine={false} tickLine={false} tick={{ fill: "#9ca3af", fontSize: 12 }} />
 										<YAxis domain={[0, 120]} axisLine={false} tickLine={false} tick={{ fill: "#9ca3af", fontSize: 12 }} />
 										{selectedMonth !== null && chartData[selectedMonth]?.hasData && (
-											<ReferenceLine 
-												x={chartData[selectedMonth].monthLabel} 
-												stroke="#a855f7" 
+											<ReferenceLine
+												x={chartData[selectedMonth].monthLabel}
+												stroke="#a855f7"
 												strokeWidth={2}
 												label={<CustomScoreLabel value={`${chartData[selectedMonth].averageScore}点`} />}
 											/>
 										)}
-										<Bar 
-											dataKey="averageScore" 
+										<Bar
+											dataKey="averageScore"
 											radius={[4, 4, 0, 0]}
 											onMouseEnter={(_data, index) => {
 												if (chartData[index]?.hasData) {
@@ -219,10 +164,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 											onMouseLeave={() => setSelectedMonth(null)}
 										>
 											{chartData.map((entry, index) => (
-												<Cell
-													key={`cell-${index}`}
-													fill={entry.hasData ? "url(#barGradient)" : "transparent"}
-												/>
+												<Cell key={`cell-${index}`} fill={entry.hasData ? "url(#barGradient)" : "transparent"} />
 											))}
 										</Bar>
 									</BarChart>
@@ -231,7 +173,12 @@ export function ProfileView({ user }: ProfileViewProps) {
 								<div className="h-full flex items-center justify-center text-gray-400">
 									<div className="text-center">
 										<svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={1.5}
+												d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+											/>
 										</svg>
 										<p>データがありません</p>
 									</div>
@@ -242,7 +189,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 
 					{/* Legend */}
 					<div className="flex items-center gap-2 mt-3">
-						<div className="w-3 h-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500" />
+						<div className="w-3 h-3 rounded-full bg-linear-to-r from-pink-500 to-purple-500" />
 						<span className="text-sm text-gray-400">平均スコア</span>
 					</div>
 				</motion.div>
@@ -258,7 +205,7 @@ export function ProfileView({ user }: ProfileViewProps) {
 					<div className="flex">
 						{/* Completed Homeworks */}
 						<div className="flex-1 flex flex-col items-center py-4">
-							<div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-2 shadow-lg shadow-pink-500/30">
+							<div className="w-12 h-12 rounded-full bg-linear-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-2 shadow-lg shadow-pink-500/30">
 								<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 								</svg>
@@ -272,16 +219,21 @@ export function ProfileView({ user }: ProfileViewProps) {
 
 						{/* Average Score */}
 						<div className="flex-1 flex flex-col items-center py-4">
-							<div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center mb-2 shadow-lg shadow-purple-500/30">
+							<div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-indigo-500 flex items-center justify-center mb-2 shadow-lg shadow-purple-500/30">
 								<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+									/>
 								</svg>
 							</div>
 							<span className="text-2xl font-bold text-white">{averageScoreOfAllResults}点</span>
 							<span className="text-sm text-gray-400">平均スコア</span>
 						</div>
 					</div>
-					
+
 					{/* Arrow indicator */}
 					<div className="flex justify-center mt-2">
 						<svg className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,4 +259,3 @@ export function ProfileView({ user }: ProfileViewProps) {
 		</div>
 	);
 }
-

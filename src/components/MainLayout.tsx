@@ -155,7 +155,7 @@ export function MainLayout() {
 					<div className="max-w-md mx-auto">
 						<div className="relative bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[28px] shadow-2xl shadow-black/40 overflow-visible">
 							{/* Inner glass reflection */}
-							<div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-white/15 via-white/5 to-transparent pointer-events-none" />
+							<div className="absolute inset-0 rounded-[28px] bg-linear-to-b from-white/15 via-white/5 to-transparent pointer-events-none" />
 
 							{/* Liquid Glass Indicator */}
 							<LiquidGlassIndicator left={indicatorPos.left} width={indicatorPos.width} />
@@ -214,7 +214,7 @@ export function MainLayout() {
 							</ul>
 
 							{/* Bottom edge highlight */}
-							<div className="absolute bottom-0 inset-x-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+							<div className="absolute bottom-0 inset-x-4 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
 						</div>
 					</div>
 				</nav>

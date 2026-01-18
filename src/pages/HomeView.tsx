@@ -51,7 +51,7 @@ function HomeSkeleton() {
 					<div className="h-6 w-24 bg-white/10 rounded mb-4" />
 					<div className="flex gap-4 overflow-hidden">
 						{[1, 2, 3].map((i) => (
-							<div key={i} className="w-64 h-24 bg-white/10 rounded-2xl flex-shrink-0" />
+							<div key={i} className="w-64 h-24 bg-white/10 rounded-2xl shrink-0" />
 						))}
 					</div>
 				</div>
@@ -154,7 +154,7 @@ export function HomeView({ user }: HomeViewProps) {
 									initial={{ opacity: 0, x: 20 }}
 									animate={{ opacity: 1, x: 0 }}
 									transition={{ delay: index * 0.1 }}
-									className="flex-shrink-0 w-64"
+									className="shrink-0 w-64"
 								>
 									<ClassItemView
 										classData={classItem}

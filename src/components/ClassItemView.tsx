@@ -32,7 +32,7 @@ export function ClassItemView({ classData, onClick }: ClassItemViewProps) {
     >
       {/* Icon with gradient background */}
       <div
-        className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}
+        className={`flex items-center justify-center w-14 h-14 rounded-xl bg-linear-to-br ${gradient} shadow-lg`}
       >
         <span className="text-2xl font-bold text-white">{firstChar}</span>
       </div>

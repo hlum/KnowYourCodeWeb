@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { remoteConfigManager } from '../managers/remoteConfigManager';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface TestExplanationViewProps {
 	onDismiss: () => void;
@@ -18,15 +17,7 @@ interface ArcTimerButtonProps {
 	disabled?: boolean;
 }
 
-function ArcTimerButton({
-	duration,
-	size = 80,
-	lineWidth = 10,
-	label = 'PUSH',
-	accentColor = '#3b82f6',
-	warningColor = '#ef4444',
-	disabled = false,
-}: ArcTimerButtonProps) {
+function ArcTimerButton({ duration, size = 80, lineWidth = 10, label = "PUSH", accentColor = "#3b82f6", disabled = false }: ArcTimerButtonProps) {
 	const [progress, setProgress] = useState(0);
 	const rafRef = useRef<number>(0);
 	const startTimeRef = useRef<number>(Date.now());
@@ -67,21 +58,12 @@ function ArcTimerButton({
 		<motion.button
 			onClick={handleClick}
 			animate={{ scale: [1, 1.05, 1] }}
-			transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+			transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
 			className="relative flex items-center justify-center cursor-pointer"
 			style={{ width: size, height: size }}
 		>
 			<svg width={size} height={size} className="transform -rotate-90">
-				<circle
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					fill="none"
-					stroke={accentColor}
-					strokeOpacity={0.15}
-					strokeWidth={lineWidth}
-					strokeLinecap="round"
-				/>
+				<circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={accentColor} strokeOpacity={0.15} strokeWidth={lineWidth} strokeLinecap="round" />
 				<circle
 					cx={size / 2}
 					cy={size / 2}
@@ -122,7 +104,7 @@ export function TestExplanationView({ onDismiss, onStartTest }: TestExplanationV
 			setCurrentStep(currentStep + 1);
 		} else {
 			if (dontShowAgain) {
-				localStorage.setItem('dontShowTestExplanation', 'true');
+				localStorage.setItem("dontShowTestExplanation", "true");
 			}
 			onStartTest();
 		}
@@ -139,15 +121,12 @@ export function TestExplanationView({ onDismiss, onStartTest }: TestExplanationV
 			<motion.div
 				initial={{ opacity: 0, scale: 0.95 }}
 				animate={{ opacity: 1, scale: 1 }}
-				className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 shadow-2xl"
+				className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-linear-to-br from-gray-900 via-purple-900/20 to-gray-900 shadow-2xl"
 			>
 				{/* Header */}
 				<div className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-sm">
 					<div className="flex items-center justify-between p-6">
-						<button
-							onClick={onDismiss}
-							className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors"
-						>
+						<button onClick={onDismiss} className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors">
 							<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
 								<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
 							</svg>
@@ -157,20 +136,13 @@ export function TestExplanationView({ onDismiss, onStartTest }: TestExplanationV
 
 					<div className="px-6 pb-6">
 						<h1 className="text-3xl font-bold text-white mb-3">テストの説明</h1>
-						<p className="text-sm text-gray-400">
-							始める前に重要な情報を確認してください
-						</p>
+						<p className="text-sm text-gray-400">始める前に重要な情報を確認してください</p>
 					</div>
 
 					{/* Progress Indicator */}
 					<div className="flex gap-2 px-10 pb-6">
 						{Array.from({ length: totalSteps }).map((_, index) => (
-							<div
-								key={index}
-								className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-									index <= currentStep ? 'bg-purple-500' : 'bg-gray-700'
-								}`}
-							/>
+							<div key={index} className={`h-1 flex-1 rounded-full transition-all duration-300 ${index <= currentStep ? "bg-purple-500" : "bg-gray-700"}`} />
 						))}
 					</div>
 				</div>
@@ -178,13 +150,7 @@ export function TestExplanationView({ onDismiss, onStartTest }: TestExplanationV
 				{/* Content */}
 				<div className="overflow-y-auto max-h-[calc(90vh-280px)] p-8">
 					<AnimatePresence mode="wait">
-						<motion.div
-							key={currentStep}
-							initial={{ opacity: 0, x: 20 }}
-							animate={{ opacity: 1, x: 0 }}
-							exit={{ opacity: 0, x: -20 }}
-							transition={{ duration: 0.3 }}
-						>
+						<motion.div key={currentStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
 							{currentStep === 0 && <StepMainTimer animatedTimerValue={animatedTimerValue} />}
 							{currentStep === 1 && <StepArcTimer />}
 							{currentStep === 2 && <StepArcTimerAction />}
@@ -228,12 +194,10 @@ export function TestExplanationView({ onDismiss, onStartTest }: TestExplanationV
 						<button
 							onClick={handleNext}
 							className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all ${
-								currentStep === totalSteps - 1
-									? 'bg-green-500 hover:bg-green-600'
-									: 'bg-purple-500 hover:bg-purple-600'
+								currentStep === totalSteps - 1 ? "bg-green-500 hover:bg-green-600" : "bg-purple-500 hover:bg-purple-600"
 							}`}
 						>
-							{currentStep < totalSteps - 1 ? '次へ' : 'テストを開始'}
+							{currentStep < totalSteps - 1 ? "次へ" : "テストを開始"}
 							{currentStep < totalSteps - 1 && (
 								<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
@@ -261,10 +225,8 @@ function StepMainTimer({ animatedTimerValue }: { animatedTimerValue: number }) {
 			{/* Explanation */}
 			<div className="glass-card p-6 bg-blue-500/5">
 				<div className="flex gap-4">
-					<div className="flex-shrink-0">
-						<div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
-							1
-						</div>
+					<div className="shrink-0">
+						<div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">1</div>
 					</div>
 					<div className="space-y-3">
 						<h3 className="text-xl font-bold text-white">メインタイマー</h3>
@@ -283,23 +245,14 @@ function StepArcTimer() {
 			{/* Illustration */}
 			<div className="glass-card p-8 flex flex-col items-center gap-8">
 				<p className="text-sm text-gray-400">画面下部</p>
-				<ArcTimerButton
-					duration={10}
-					size={80}
-					lineWidth={10}
-					label="PUSH"
-					accentColor="#3b82f6"
-					disabled={true}
-				/>
+				<ArcTimerButton duration={10} size={80} lineWidth={10} label="PUSH" accentColor="#3b82f6" disabled={true} />
 			</div>
 
 			{/* Explanation */}
 			<div className="glass-card p-6 bg-orange-500/5">
 				<div className="flex gap-4">
-					<div className="flex-shrink-0">
-						<div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-							2
-						</div>
+					<div className="shrink-0">
+						<div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">2</div>
 					</div>
 					<div className="space-y-3">
 						<h3 className="text-xl font-bold text-white">アークタイマー</h3>
@@ -324,19 +277,13 @@ function StepArcTimerAction() {
 			{/* Explanation */}
 			<div className="glass-card p-6 bg-red-500/5">
 				<div className="flex gap-4">
-					<div className="flex-shrink-0">
-						<div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-bold">
-							3
-						</div>
+					<div className="shrink-0">
+						<div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-bold">3</div>
 					</div>
 					<div className="space-y-3">
 						<h3 className="text-xl font-bold text-red-400">重要: 10秒ごとにタップ!</h3>
-						<p className="text-gray-300">
-							アークタイマーが一周する前(10秒以内)に必ずタップしてください。
-						</p>
-						<p className="text-red-400 font-semibold">
-							タップし忘れると、自動的に次の質問に進んでしまいます。
-						</p>
+						<p className="text-gray-300">アークタイマーが一周する前(10秒以内)に必ずタップしてください。</p>
+						<p className="text-red-400 font-semibold">タップし忘れると、自動的に次の質問に進んでしまいます。</p>
 					</div>
 				</div>
 			</div>
@@ -358,40 +305,32 @@ function StepNoReturn() {
 			{/* Warnings */}
 			<div className="glass-card p-6 bg-orange-500/5">
 				<div className="flex gap-4">
-					<div className="flex-shrink-0">
-						<div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">
-							4
-						</div>
+					<div className="shrink-0">
+						<div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">4</div>
 					</div>
 					<div className="space-y-4">
 						<h3 className="text-xl font-bold text-white">戻ることができません</h3>
 
 						<div className="space-y-3">
 							<div className="flex gap-3">
-								<svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+								<svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
 								</svg>
-								<p className="text-gray-300">
-									テストを開始すると、途中で戻ることはできません。
-								</p>
+								<p className="text-gray-300">テストを開始すると、途中で戻ることはできません。</p>
 							</div>
 
 							<div className="flex gap-3">
-								<svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+								<svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
 								</svg>
-								<p className="text-gray-300">
-									アプリを閉じたり、戻るボタンを押すと、再受験できなくなります。
-								</p>
+								<p className="text-gray-300">アプリを閉じたり、戻るボタンを押すと、再受験できなくなります。</p>
 							</div>
 
 							<div className="flex gap-3">
-								<svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+								<svg className="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
 								</svg>
-								<p className="text-gray-300">
-									集中できる環境で、最後まで完了する準備をしてから始めてください。
-								</p>
+								<p className="text-gray-300">集中できる環境で、最後まで完了する準備をしてから始めてください。</p>
 							</div>
 						</div>
 					</div>
@@ -415,10 +354,8 @@ function StepFinalConfirmation() {
 			{/* Summary */}
 			<div className="glass-card p-6 bg-green-500/5">
 				<div className="flex gap-4">
-					<div className="flex-shrink-0">
-						<div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
-							5
-						</div>
+					<div className="shrink-0">
+						<div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">5</div>
 					</div>
 					<div className="space-y-4">
 						<h3 className="text-xl font-bold text-white">テスト概要</h3>
@@ -472,7 +409,7 @@ function StepFinalConfirmation() {
 function SummaryRow({ icon, color, text }: { icon: React.ReactNode; color: string; text: string }) {
 	return (
 		<div className="flex gap-3 items-start">
-			<div className={`flex-shrink-0 ${color}`}>{icon}</div>
+			<div className={`shrink-0 ${color}`}>{icon}</div>
 			<p className="text-gray-300">{text}</p>
 		</div>
 	);
@@ -480,15 +417,15 @@ function SummaryRow({ icon, color, text }: { icon: React.ReactNode; color: strin
 
 // Preference Manager
 export class TestExplanationPreference {
-	private static readonly KEY = 'dontShowTestExplanation';
+	private static readonly KEY = "dontShowTestExplanation";
 
 	static shouldShowExplanation(): boolean {
-		return localStorage.getItem(this.KEY) !== 'true';
+		return localStorage.getItem(this.KEY) !== "true";
 	}
 
 	static setDontShowAgain(value: boolean): void {
 		if (value) {
-			localStorage.setItem(this.KEY, 'true');
+			localStorage.setItem(this.KEY, "true");
 		} else {
 			localStorage.removeItem(this.KEY);
 		}

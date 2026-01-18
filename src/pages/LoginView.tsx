@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 import appLogo from "../assets/appLogo.png";
 import googleIcon from "../assets/google.png";
@@ -104,10 +104,10 @@ function FeatureCard({ feature, index }: { feature: (typeof features)[0]; index:
 				className="relative glass-card p-8 hover:shadow-2xl hover:shadow-purple-500/20 transition-shadow duration-300"
 			>
 				{/* Gradient indicator bar */}
-				<div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient} rounded-t-2xl`} />
+				<div className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${feature.gradient} rounded-t-2xl`} />
 
 				{/* Gradient background on hover */}
-				<div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`} />
+				<div className={`absolute inset-0 bg-linear-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`} />
 
 				{/* Title */}
 				<h3 className="text-2xl font-bold text-white mb-4 relative z-10 mt-4">{feature.title}</h3>
@@ -117,12 +117,12 @@ function FeatureCard({ feature, index }: { feature: (typeof features)[0]; index:
 
 				{/* Shine effect */}
 				<motion.div
-					className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 rounded-2xl"
+					className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 rounded-2xl"
 					style={{ transformStyle: "preserve-3d" }}
 				/>
 
 				{/* Decorative corner accent */}
-				<div className={`absolute bottom-4 right-4 w-12 h-12 bg-gradient-to-br ${feature.gradient} opacity-20 rounded-lg blur-sm`} />
+				<div className={`absolute bottom-4 right-4 w-12 h-12 bg-linear-to-br ${feature.gradient} opacity-20 rounded-lg blur-sm`} />
 			</motion.div>
 		</motion.div>
 	);
@@ -169,7 +169,7 @@ export function LoginView() {
 				<DarkVeil speed={3} hueShift={46} warpAmount={5} />
 			</div>{" "}
 			{/* Progress bar */}
-			<motion.div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 origin-left z-50" style={{ scaleX }} />
+			<motion.div className="fixed top-0 left-0 right-0 h-1 bg-linear-to-r from-purple-500 via-pink-500 to-cyan-500 origin-left z-50" style={{ scaleX }} />
 			{/* Fixed Header with Sign In Button */}
 			<motion.header initial={{ y: -100 }} animate={{ y: 0 }} className="fixed top-1 left-0 right-0 z-40 px-6 py-4">
 				<div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -195,8 +195,8 @@ export function LoginView() {
 			{/* Animated background blobs */}
 			<div className="fixed inset-0 pointer-events-none">
 				<ParallaxShape className="absolute top-20 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" speed={0.3} />
-				<ParallaxShape className="absolute top-1/2 right-20 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" speed={0.5} />
-				<ParallaxShape className="absolute bottom-20 left-1/3 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-3xl" speed={0.4} />
+				<ParallaxShape className="absolute top-1/2 right-20 w-125 h-125 bg-blue-500/10 rounded-full blur-3xl" speed={0.5} />
+				<ParallaxShape className="absolute bottom-20 left-1/3 w-100 h-100 bg-pink-500/10 rounded-full blur-3xl" speed={0.4} />
 			</div>
 			{/* Error Alert */}
 			{error && (
@@ -222,7 +222,7 @@ export function LoginView() {
 					<motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, ease: "easeOut" }} className="text-center">
 						{/* Title with gradient */}
 						<motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.8 }} className="text-6xl md:text-8xl font-black mb-6">
-							<span className="bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">Know Your Code</span>
+							<span className="bg-linear-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">Know Your Code</span>
 						</motion.h1>
 
 						{/* Subtitle */}
@@ -317,7 +317,7 @@ export function LoginView() {
 							<p className="text-gray-400 text-center mb-6 text-lg">モバイルアプリもあります</p>
 							<div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
 								{/* iOS Download */}
-								<motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href="#" className="btn-outline-dark flex-1 w-full sm:w-auto min-w-[200px]">
+								<motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href="#" className="btn-outline-dark flex-1 w-full sm:w-auto min-w-50">
 									<svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
 										<path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
 									</svg>
@@ -328,7 +328,7 @@ export function LoginView() {
 								</motion.a>
 
 								{/* Android Download */}
-								<motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href="#" className="btn-outline-dark flex-1 w-full sm:w-auto min-w-[200px]">
+								<motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href="#" className="btn-outline-dark flex-1 w-full sm:w-auto min-w-50">
 									<svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
 										<path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z" />
 									</svg>
