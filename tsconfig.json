@@ -3,6 +3,10 @@
 	"references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
 	"compilerOptions": {
 		"erasableSyntaxOnly": false,
-		"verbatimModuleSyntax": false
+		"verbatimModuleSyntax": false,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		}
 	}
 }
