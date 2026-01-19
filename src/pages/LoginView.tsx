@@ -1,24 +1,23 @@
-import { useState, useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
-import appLogo from "../assets/appLogo.png";
+import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
+import { useRef, useState } from "react";
 import googleIcon from "../assets/google.png";
-import { authManager } from "../managers/authManager";
 import DarkVeil from "../components/DarkVeil";
 import GlassSurface from "../components/GlassSurface";
 import SplashCursor from "../components/SplashCursor";
+import { authManager } from "../managers/authManager";
 
 // Feature data
 const features = [
 	{
 		id: 1,
-		title: "10秒アークタイマー",
-		description: "集中力を維持するため、10秒ごとにタップが必要。本番さながらの緊張感を体験",
+		title: "不正防止",
+		description: "AI利用を防止するため、定期的なタップを要求",
 		gradient: "from-blue-500 to-cyan-500",
 	},
 	{
 		id: 2,
-		title: "戻れない設計",
-		description: "一度始めたら戻れない。本物の試験のような環境で真の実力を測定",
+		title: "Siri 対応",
+		description: "音声アシスタントで、自分の平均点数や課題の進捗を確認可能",
 		gradient: "from-purple-500 to-pink-500",
 	},
 	{
@@ -29,20 +28,20 @@ const features = [
 	},
 	{
 		id: 4,
-		title: "詳細な統計分析",
-		description: "理解度を可視化し、成長を追跡。弱点を明確にして効率的に学習",
+		title: "Widget機能",
+		description: "ホーム画面で進捗を一目で確認。モチベーションを維持",
 		gradient: "from-orange-500 to-red-500",
 	},
 	{
 		id: 5,
-		title: "リアルタイム採点",
-		description: "即座に結果を確認。フィードバックループで効率的な学習をサポート",
+		title: "通知機能",
+		description: "新しいクイズの通知を受け取り、学習を逃さない",
 		gradient: "from-yellow-500 to-orange-500",
 	},
 	{
 		id: 6,
-		title: "クラス管理システム",
-		description: "課題と科目を整理整頓。学習の進捗を一目で把握できる",
+		title: "学科ごとの詳細分析",
+		description: "各科目の理解度を詳細に分析し、弱点を把握",
 		gradient: "from-indigo-500 to-purple-500",
 	},
 ];
@@ -84,7 +83,7 @@ function FeatureCard({ feature, index }: { feature: (typeof features)[0]; index:
 								rotateX: tiltX,
 								rotateY: tiltY,
 								rotateZ: rotateZ,
-						  }
+							}
 						: {}
 				}
 				transition={{
@@ -174,10 +173,7 @@ export function LoginView() {
 			<motion.header initial={{ y: -100 }} animate={{ y: 0 }} className="fixed top-1 left-0 right-0 z-40 px-6 py-4">
 				<div className="max-w-7xl mx-auto flex items-center justify-between">
 					{/* Logo/Brand */}
-					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-3">
-						<img src={appLogo} alt="Know Your Code" className="w-10 h-10 object-contain" />
-						<span className="text-white font-bold text-lg hidden sm:block">Know Your Code</span>
-					</motion.div>
+					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-3"></motion.div>
 
 					{/* Sign In Button */}
 					<motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleGoogleSignIn} disabled={isLoading}>
@@ -314,10 +310,15 @@ export function LoginView() {
 					<motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="max-w-7xl mx-auto">
 						{/* Download Section */}
 						<div className="mb-12">
-							<p className="text-gray-400 text-center mb-6 text-lg">モバイルアプリもあります</p>
+							<p className="text-gray-400 text-center mb-6 text-lg">モバイル版</p>
 							<div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
 								{/* iOS Download */}
-								<motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href="#" className="btn-outline-dark flex-1 w-full sm:w-auto min-w-50">
+								<motion.a
+									whileHover={{ scale: 1.02, y: -2 }}
+									whileTap={{ scale: 0.98 }}
+									href="https://apps.apple.com/jp/app/knowyourcode/id6757673127"
+									className="btn-outline-dark flex-1 w-full sm:w-auto min-w-50"
+								>
 									<svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
 										<path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
 									</svg>
