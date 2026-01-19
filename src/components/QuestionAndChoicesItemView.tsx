@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import type { QuestionWithChoices, Choice } from "../types/models";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { QuestionViewMode } from "../hooks/useQuestionsViewModel";
 import { remoteConfigManager } from "../managers/remoteConfigManager";
+import type { Choice, QuestionWithChoices } from "../types/models";
 
 interface QuestionAndChoicesItemViewProps {
 	questionAndChoices: QuestionWithChoices;
@@ -257,7 +257,7 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 	const isWarning = remainingTime <= 5;
 
 	return (
-		<div className="w-full max-w-2xl mx-auto">
+		<div className="w-full max-w-2xl mx-auto select-none">
 			<div className="glass-card p-6">
 				{/* Timer for answering mode */}
 				{mode === "answering" && (

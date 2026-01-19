@@ -1,12 +1,12 @@
-import { useEffect } from "react";
 import type { User } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useHomeViewModel } from "../hooks/useHomeViewModel";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import defaultProfilePic from "../assets/profilePic.jpg";
 import { ClassItemView } from "../components/ClassItemView";
 import { HomeworkItemView } from "../components/HomeworkItemView";
+import { useHomeViewModel } from "../hooks/useHomeViewModel";
 import { Paths, getClassHomeworksPath, getHomeworkDetailPath } from "../router/paths";
-import defaultProfilePic from "../assets/profilePic.jpg";
 
 interface HomeViewProps {
 	user: User;
@@ -78,15 +78,15 @@ export function HomeView({ user }: HomeViewProps) {
 	// Refresh data when page becomes visible (e.g., after returning from test)
 	useEffect(() => {
 		const handleVisibilityChange = () => {
-			if (document.visibilityState === 'visible') {
+			if (document.visibilityState === "visible") {
 				refresh();
 			}
 		};
 
-		document.addEventListener('visibilitychange', handleVisibilityChange);
+		document.addEventListener("visibilitychange", handleVisibilityChange);
 
 		return () => {
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
 		};
 	}, [refresh]);
 
@@ -105,17 +105,9 @@ export function HomeView({ user }: HomeViewProps) {
 				<div className="absolute bottom-1/3 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
 			</div>
 
-			<motion.div
-				variants={containerVariants}
-				initial="hidden"
-				animate="visible"
-				className="relative z-10 max-w-4xl mx-auto p-6"
-			>
+			<motion.div variants={containerVariants} initial="hidden" animate="visible" className="relative z-10 max-w-4xl mx-auto p-6">
 				{/* Header */}
-				<motion.header
-					variants={itemVariants}
-					className="glass-card p-6 mb-8"
-				>
+				<motion.header variants={itemVariants} className="glass-card p-6 mb-8">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-gray-400 text-sm mb-1">こんにちは 👋</p>
@@ -133,11 +125,7 @@ export function HomeView({ user }: HomeViewProps) {
 
 				{/* Error message */}
 				{error && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="mb-6 p-4 glass-card border-red-500/30 flex items-center justify-between"
-					>
+					<motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 glass-card border-red-500/30 flex items-center justify-between">
 						<span className="text-red-400">{error}</span>
 						<button onClick={refresh} className="text-red-400 hover:text-red-300 font-semibold">
 							再試行
@@ -147,17 +135,9 @@ export function HomeView({ user }: HomeViewProps) {
 
 				{/* Classes Section */}
 				<motion.section variants={itemVariants} className="mb-10">
-					<button
-						onClick={() => navigate(Paths.CLASSES)}
-						className="flex items-center gap-2 mb-4 group"
-					>
+					<button onClick={() => navigate(Paths.CLASSES)} className="flex items-center gap-2 mb-4 group">
 						<h2 className="text-xl font-bold text-white">科目</h2>
-						<svg
-							className="w-5 h-5 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg className="w-5 h-5 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 						</svg>
 					</button>
@@ -165,28 +145,14 @@ export function HomeView({ user }: HomeViewProps) {
 					{classes.length > 0 ? (
 						<div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide">
 							{classes.map((classItem, index) => (
-								<motion.div
-									key={classItem.id}
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: index * 0.1 }}
-									className="shrink-0 w-64"
-								>
-									<ClassItemView
-										classData={classItem}
-										onClick={() => navigate(getClassHomeworksPath(classItem.id))}
-									/>
+								<motion.div key={classItem.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }} className="shrink-0 w-64">
+									<ClassItemView classData={classItem} onClick={() => navigate(getClassHomeworksPath(classItem.id))} />
 								</motion.div>
 							))}
 						</div>
 					) : (
 						<div className="glass-card p-8 text-center">
-							<svg
-								className="w-12 h-12 mx-auto text-gray-500 mb-3"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
+							<svg className="w-12 h-12 mx-auto text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -201,17 +167,9 @@ export function HomeView({ user }: HomeViewProps) {
 
 				{/* Upcoming Homeworks Section */}
 				<motion.section variants={itemVariants}>
-					<button
-						onClick={() => navigate(Paths.HOMEWORKS)}
-						className="flex items-center gap-2 mb-4 group"
-					>
+					<button onClick={() => navigate(Paths.HOMEWORKS)} className="flex items-center gap-2 mb-4 group">
 						<h2 className="text-xl font-bold text-white">提出期限が近い課題</h2>
-						<svg
-							className="w-5 h-5 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg className="w-5 h-5 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
 						</svg>
 					</button>
@@ -219,12 +177,7 @@ export function HomeView({ user }: HomeViewProps) {
 					{homeworks.length > 0 ? (
 						<div className="space-y-4">
 							{homeworks.map((homework, index) => (
-								<motion.div
-									key={homework.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.05 }}
-								>
+								<motion.div key={homework.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
 									<HomeworkItemView
 										homework={homework}
 										onClick={() => navigate(getHomeworkDetailPath(homework.id))}
@@ -235,18 +188,8 @@ export function HomeView({ user }: HomeViewProps) {
 						</div>
 					) : (
 						<div className="glass-card p-8 text-center">
-							<svg
-								className="w-12 h-12 mx-auto text-gray-500 mb-3"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={1.5}
-									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
+							<svg className="w-12 h-12 mx-auto text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 							</svg>
 							<p className="text-gray-400">提出期限が近い課題はありません</p>
 						</div>
