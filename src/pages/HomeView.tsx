@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -73,6 +74,21 @@ function HomeSkeleton() {
 export function HomeView({ user }: HomeViewProps) {
 	const navigate = useNavigate();
 	const { userData, classes, homeworks, isLoading, error, refresh } = useHomeViewModel(user);
+
+	// Refresh data when page becomes visible (e.g., after returning from test)
+	useEffect(() => {
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				refresh();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [refresh]);
 
 	if (isLoading) {
 		return <HomeSkeleton />;

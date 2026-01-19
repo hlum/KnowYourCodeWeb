@@ -223,7 +223,7 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 					{homework.submission_state === "generatingQuestions" && <GeneratingQuestionsState />}
 
 					{homework.submission_state === "questionGenerated" && (
-						<QuestionGeneratedState homeworkId={homeworkId} />
+						<QuestionGeneratedState homeworkId={homeworkId} currentState={homework.submission_state} />
 					)}
 
 					{homework.submission_state === "failed" && (
@@ -363,18 +363,25 @@ function GeneratingQuestionsState() {
 // Question Generated State - Show answer button
 interface QuestionGeneratedStateProps {
 	homeworkId: string;
+	currentState: string;
 }
 
-function QuestionGeneratedState({ homeworkId }: QuestionGeneratedStateProps) {
+function QuestionGeneratedState({ homeworkId, currentState }: QuestionGeneratedStateProps) {
 	const navigate = useNavigate();
+
+	const handleClick = () => {
+		// Double-check state before navigating (prevent retaking)
+		if (currentState !== "questionGenerated") {
+			return;
+		}
+		navigate(getHomeworkQuestionsPath(homeworkId), { replace: true });
+	};
 
 	return (
 		<motion.button
 			whileHover={{ scale: 1.02 }}
 			whileTap={{ scale: 0.98 }}
-			onClick={() => {
-				navigate(getHomeworkQuestionsPath(homeworkId), { replace: true });
-			}}
+			onClick={handleClick}
 			className="w-full py-4 btn-gradient font-semibold rounded-full flex items-center justify-center gap-2"
 		>
 			<div className="w-8 h-8">
