@@ -1,5 +1,6 @@
 import { APIResponse, ErrorType } from "../types/models";
 import { LollipopError } from "./errors";
+import { auth } from "../firebase/firebase";
 
 // Configuration - set these values in your environment
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || "";
@@ -19,10 +20,31 @@ export class ApiClient {
 		return `${base}/${path}`;
 	}
 
+	private async getAuthToken(): Promise<string> {
+		const currentUser = auth.currentUser;
+		if (!currentUser) {
+			// Fallback to API key if no user is authenticated (shouldn't happen in normal flow)
+			return this.apiKey;
+		}
+
+		try {
+			// Get fresh Firebase ID token
+			const token = await currentUser.getIdToken();
+			return token;
+		} catch (error) {
+			console.error("Failed to get Firebase ID token:", error);
+			// Fallback to API key
+			return this.apiKey;
+		}
+	}
+
 	private async makeRequest<T>(url: string, method: string, body?: unknown): Promise<APIResponse<T>> {
+		// Get the auth token (Firebase ID token or fallback to API key)
+		const authToken = await this.getAuthToken();
+
 		const headers: HeadersInit = {
 			"Content-Type": "application/json",
-			Authorization: this.apiKey,
+			Authorization: authToken,
 		};
 
 		const options: RequestInit = {
