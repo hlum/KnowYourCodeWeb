@@ -4,15 +4,12 @@ import { auth } from "../firebase/firebase";
 
 // Configuration - set these values in your environment
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || "";
-const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 export class ApiClient {
 	private baseUrl: string;
-	private apiKey: string;
 
-	constructor(baseUrl?: string, apiKey?: string) {
+	constructor(baseUrl?: string) {
 		this.baseUrl = baseUrl || API_ENDPOINT;
-		this.apiKey = apiKey || API_KEY;
 	}
 
 	private makeUrl(path: string): string {
@@ -23,8 +20,7 @@ export class ApiClient {
 	private async getAuthToken(): Promise<string> {
 		const currentUser = auth.currentUser;
 		if (!currentUser) {
-			// Fallback to API key if no user is authenticated (shouldn't happen in normal flow)
-			return this.apiKey;
+			throw new Error("User must be authenticated to make API requests");
 		}
 
 		try {
@@ -33,13 +29,12 @@ export class ApiClient {
 			return token;
 		} catch (error) {
 			console.error("Failed to get Firebase ID token:", error);
-			// Fallback to API key
-			return this.apiKey;
+			throw error;
 		}
 	}
 
 	private async makeRequest<T>(url: string, method: string, body?: unknown): Promise<APIResponse<T>> {
-		// Get the auth token (Firebase ID token or fallback to API key)
+		// Get the Firebase ID token
 		const authToken = await this.getAuthToken();
 
 		const headers: HeadersInit = {
