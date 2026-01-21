@@ -1,17 +1,15 @@
 import { APIResponse, ErrorType } from "../types/models";
 import { LollipopError } from "./errors";
+import { auth } from "../firebase/firebase";
 
 // Configuration - set these values in your environment
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || "";
-const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 export class ApiClient {
 	private baseUrl: string;
-	private apiKey: string;
 
-	constructor(baseUrl?: string, apiKey?: string) {
+	constructor(baseUrl?: string) {
 		this.baseUrl = baseUrl || API_ENDPOINT;
-		this.apiKey = apiKey || API_KEY;
 	}
 
 	private makeUrl(path: string): string {
@@ -19,10 +17,29 @@ export class ApiClient {
 		return `${base}/${path}`;
 	}
 
+	private async getAuthToken(): Promise<string> {
+		const currentUser = auth.currentUser;
+		if (!currentUser) {
+			throw new Error("User must be authenticated to make API requests");
+		}
+
+		try {
+			// Get fresh Firebase ID token
+			const token = await currentUser.getIdToken();
+			return token;
+		} catch (error) {
+			console.error("Failed to get Firebase ID token:", error);
+			throw error;
+		}
+	}
+
 	private async makeRequest<T>(url: string, method: string, body?: unknown): Promise<APIResponse<T>> {
+		// Get the Firebase ID token
+		const authToken = await this.getAuthToken();
+
 		const headers: HeadersInit = {
 			"Content-Type": "application/json",
-			Authorization: this.apiKey,
+			Authorization: authToken,
 		};
 
 		const options: RequestInit = {

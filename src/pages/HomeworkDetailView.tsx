@@ -163,7 +163,7 @@ export function HomeworkDetailView({ user }: HomeworkDetailViewProps) {
 									</defs>
 									<circle cx="32" cy="32" r="28" fill="none" stroke="url(#scoreGradient)" strokeWidth="4" />
 								</svg>
-								<span className="text-sm font-bold text-white">{result.id}点</span>
+								<span className="text-sm font-bold text-white">{result.score}点</span>
 							</div>
 						)}
 					</div>
