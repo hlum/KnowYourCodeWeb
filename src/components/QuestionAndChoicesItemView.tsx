@@ -8,8 +8,10 @@ interface QuestionAndChoicesItemViewProps {
 	questionAndChoices: QuestionWithChoices;
 	mode: QuestionViewMode;
 	isLastQuestion?: boolean;
-	onClickNext?: (selectedChoiceId: string | null) => void;
+	onSubmitAnswer?: (selectedChoiceId: string | null) => Promise<void>; // Submit answer to API
+	onClickNext?: () => void; // Navigate to next question
 	selectedChoiceIdFromServer?: string | null; // for review mode
+	correctChoiceId?: string | null; // correct choice ID from server
 }
 
 // Arc Timer Button Component - uses requestAnimationFrame for smooth animation
@@ -23,6 +25,7 @@ interface ArcTimerButtonProps {
 	warningThreshold?: number;
 	onComplete?: () => void;
 	resetTrigger?: number;
+	paused?: boolean;
 }
 
 function ArcTimerButton({
@@ -35,16 +38,32 @@ function ArcTimerButton({
 	warningThreshold = 3,
 	onComplete,
 	resetTrigger = 0,
+	paused = false,
 }: ArcTimerButtonProps) {
 	const [progress, setProgress] = useState(0);
 	const rafRef = useRef<number>(0);
 	const startTimeRef = useRef<number>(Date.now());
+	const pausedElapsedRef = useRef<number>(0);
+	const isPausedRef = useRef(false);
 	const onCompleteRef = useRef(onComplete);
 	const hasCompletedRef = useRef(false);
 
 	useEffect(() => {
 		onCompleteRef.current = onComplete;
 	}, [onComplete]);
+
+	// Handle pause/resume by adjusting start time
+	useEffect(() => {
+		if (paused && !isPausedRef.current) {
+			// Pausing: save the current elapsed time
+			pausedElapsedRef.current = (Date.now() - startTimeRef.current) / 1000;
+			isPausedRef.current = true;
+		} else if (!paused && isPausedRef.current) {
+			// Resuming: adjust start time to account for the pause
+			startTimeRef.current = Date.now() - pausedElapsedRef.current * 1000;
+			isPausedRef.current = false;
+		}
+	}, [paused]);
 
 	const remainingSeconds = Math.max(0, Math.ceil((1 - progress) * duration));
 	const isWarning = remainingSeconds <= warningThreshold && remainingSeconds > 0;
@@ -54,9 +73,17 @@ function ArcTimerButton({
 	useEffect(() => {
 		startTimeRef.current = Date.now();
 		hasCompletedRef.current = false;
+		pausedElapsedRef.current = 0;
+		isPausedRef.current = paused;
 		setProgress(0);
 
 		const animate = () => {
+			if (isPausedRef.current) {
+				// When paused, keep requesting frames but don't update progress
+				rafRef.current = requestAnimationFrame(animate);
+				return;
+			}
+
 			const elapsed = (Date.now() - startTimeRef.current) / 1000;
 			const newProgress = Math.min(1, elapsed / duration);
 			setProgress(newProgress);
@@ -120,7 +147,7 @@ function ArcTimerButton({
 	);
 }
 
-export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQuestion = false, onClickNext, selectedChoiceIdFromServer }: QuestionAndChoicesItemViewProps) {
+export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQuestion = false, onSubmitAnswer, onClickNext, selectedChoiceIdFromServer, correctChoiceId }: QuestionAndChoicesItemViewProps) {
 	// Get timer durations from Remote Config
 	const MAIN_TIMER_DURATION = remoteConfigManager.mainTimerDuration;
 	const ARC_TIMER_DURATION = remoteConfigManager.arcTimerDuration;
@@ -128,14 +155,15 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 	const [remainingTime, setRemainingTime] = useState(MAIN_TIMER_DURATION);
 	const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [arcTimerReset, setArcTimerReset] = useState(0);
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-	const onClickNextRef = useRef(onClickNext);
+	const onSubmitAnswerRef = useRef(onSubmitAnswer);
 
-	// Keep onClickNext ref updated
+	// Keep onSubmitAnswer ref updated
 	useEffect(() => {
-		onClickNextRef.current = onClickNext;
-	}, [onClickNext]);
+		onSubmitAnswerRef.current = onSubmitAnswer;
+	}, [onSubmitAnswer]);
 
 	// Initialize for review mode
 	useEffect(() => {
@@ -165,9 +193,13 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 				if (prev <= 1) {
 					clearInterval(timerRef.current!);
 					timerRef.current = null;
-					// Time's up - auto submit with null and go to next
-					setTimeout(() => {
-						onClickNextRef.current?.(null);
+					// Time's up - auto submit with null
+					setTimeout(async () => {
+						try {
+							await onSubmitAnswerRef.current?.(null);
+						} catch (error) {
+							console.error('Failed to auto-submit answer:', error);
+						}
 					}, 0);
 					return 0;
 				}
@@ -184,9 +216,13 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 				if (prev <= 1) {
 					clearInterval(timerRef.current!);
 					timerRef.current = null;
-					// Time's up - auto submit with null and go to next
-					setTimeout(() => {
-						onClickNextRef.current?.(null);
+					// Time's up - auto submit with null
+					setTimeout(async () => {
+						try {
+							await onSubmitAnswerRef.current?.(null);
+						} catch (error) {
+							console.error('Failed to auto-submit answer:', error);
+						}
 					}, 0);
 					return 0;
 				}
@@ -201,6 +237,13 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 		}
 		return () => stopTimer();
 	}, [mode, questionAndChoices.question_id, startTimer, stopTimer]);
+
+	// Stop timer when answer is submitted
+	useEffect(() => {
+		if (submitted && mode === "answering") {
+			stopTimer();
+		}
+	}, [submitted, mode, stopTimer]);
 
 	// Reset state when question changes
 	useEffect(() => {
@@ -218,28 +261,39 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 		}
 	};
 
-	const handleSubmit = () => {
-		if (!submitted) {
-			// Submit answer - show correct/incorrect
-			setSubmitted(true);
-		} else {
-			// Go to next question
-			onClickNext?.(selectedChoiceId);
+	const handleSubmit = async () => {
+		if (!submitted && !isSubmitting) {
+			// First click: Submit answer to API
+			setIsSubmitting(true);
+			try {
+				await onSubmitAnswer?.(selectedChoiceId);
+				// After successful API response, mark as submitted to show feedback
+				setSubmitted(true);
+			} catch (error) {
+				console.error('Failed to submit answer:', error);
+				// On error, allow retry
+			} finally {
+				setIsSubmitting(false);
+			}
+		} else if (submitted && !isSubmitting) {
+			// Second click: Navigate to next question
+			onClickNext?.();
 			if (!isLastQuestion) {
 				restartTimer();
 			}
 		}
 	};
 
-	// Arc timer complete - go to next question with null
-	const handleArcTimerComplete = useCallback(() => {
-		onClickNextRef.current?.(null);
-		if (!isLastQuestion) {
-			setRemainingTime(MAIN_TIMER_DURATION);
-			setSelectedChoiceId(null);
-			setSubmitted(false);
+	// Arc timer complete - auto submit with null answer
+	const handleArcTimerComplete = useCallback(async () => {
+		if (!submitted) {
+			try {
+				await onSubmitAnswer?.(null);
+			} catch (error) {
+				console.error('Failed to auto-submit answer:', error);
+			}
 		}
-	}, [isLastQuestion, MAIN_TIMER_DURATION]);
+	}, [submitted, onSubmitAnswer]);
 
 	const isChoiceSelected = (choice: Choice) => {
 		if (mode === "answering") {
@@ -286,6 +340,7 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 							submitted={isSubmitted}
 							onClick={() => handleChoiceClick(choice.choice_id)}
 							disabled={mode === "review" || submitted}
+					correctChoiceId={correctChoiceId}
 						/>
 					))}
 				</div>
@@ -296,10 +351,20 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
 						onClick={handleSubmit}
-						disabled={!selectedChoiceId && !submitted}
-						className={`w-full py-4 font-semibold rounded-xl text-white transition-all ${!selectedChoiceId && !submitted ? "bg-white/10 cursor-not-allowed opacity-60" : buttonColor}`}
+						disabled={(!selectedChoiceId && !submitted) || isSubmitting}
+						className={`w-full py-4 font-semibold rounded-xl text-white transition-all ${(!selectedChoiceId && !submitted) || isSubmitting ? "bg-white/10 cursor-not-allowed opacity-60" : buttonColor}`}
 					>
-						{buttonLabel}
+						{isSubmitting ? (
+					<div className="flex items-center justify-center gap-2">
+						<svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<span>送信中...</span>
+					</div>
+				) : (
+					buttonLabel
+				)}
 					</motion.button>
 				)}
 			</div>
@@ -317,6 +382,7 @@ export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQue
 						warningThreshold={3}
 						onComplete={handleArcTimerComplete}
 						resetTrigger={arcTimerReset}
+					paused={submitted}
 					/>
 				</div>
 			)}
@@ -331,12 +397,13 @@ interface ChoiceButtonProps {
 	submitted: boolean;
 	onClick: () => void;
 	disabled: boolean;
+	correctChoiceId?: string | null;
 }
 
-function ChoiceButton({ choice, isSelected, submitted, onClick, disabled }: ChoiceButtonProps) {
+function ChoiceButton({ choice, isSelected, submitted, onClick, disabled, correctChoiceId }: ChoiceButtonProps) {
 	const getIcon = () => {
-		if (submitted) {
-			if (choice.is_correct) {
+		if (submitted && correctChoiceId) {
+			if (choice.choice_id === correctChoiceId) {
 				return (
 					<svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 24 24">
 						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
@@ -365,8 +432,8 @@ function ChoiceButton({ choice, isSelected, submitted, onClick, disabled }: Choi
 
 	// Determine background based on state
 	const getBackgroundClass = () => {
-		if (submitted) {
-			if (choice.is_correct) {
+		if (submitted && correctChoiceId) {
+			if (choice.choice_id === correctChoiceId) {
 				return "bg-green-500/20 border-green-500/50";
 			} else if (isSelected) {
 				return "bg-red-500/20 border-red-500/50";

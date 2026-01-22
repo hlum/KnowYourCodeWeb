@@ -73,7 +73,6 @@ export interface QuestionWithChoices {
 export interface Choice {
   choice_id: string;
   choice_text: string;
-  is_correct: boolean;
 }
 
 // Answer
@@ -82,6 +81,11 @@ export interface Answer {
   question_id: string;
   user_id: string;
   selected_choice_id?: string | null;
+}
+
+// Post Answer Response
+export interface PostAnswerResponse {
+  correct_choice_id: string | null;
 }
 
 // Result data

@@ -5,7 +5,7 @@ export class QuestionsApi {
 	constructor(private client: ApiClient = apiClient) {}
 
 	async fetchAll(homeworkId: string, userId: string): Promise<QuestionWithChoices[]> {
-		return this.client.get<QuestionWithChoices>("questions_choices/get_questions_choices.php", {
+		return this.client.get<QuestionWithChoices>("questions_choices/v2/get_questions_choices.php", {
 			homework_id: homeworkId,
 			user_id: userId,
 		});
