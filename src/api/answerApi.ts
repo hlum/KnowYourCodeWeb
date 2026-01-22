@@ -1,5 +1,5 @@
 import { apiClient, ApiClient } from './apiClient';
-import { Answer } from '../types/models';
+import { Answer, PostAnswerResponse } from '../types/models';
 import { LollipopError } from './errors';
 
 export interface PostAnswerParams {
@@ -13,14 +13,17 @@ export interface PostAnswerParams {
 export class AnswerApi {
   constructor(private client: ApiClient = apiClient) {}
 
-  async postAnswer(params: PostAnswerParams): Promise<void> {
-    await this.client.post('answer/add_answer.php', {
+  async postAnswer(params: PostAnswerParams): Promise<PostAnswerResponse> {
+    const response = await this.client.post<PostAnswerResponse>('answer/add_answer.php', {
       question_id: params.questionId,
       homework_id: params.homeworkId,
       user_id: params.userId,
       selected_choice_id: params.selectedChoiceId ?? null,
       total_questions: String(params.totalQuestions),
     });
+
+    // Extract correct_choice_id from response.data[0]
+    return response.data?.[0] || { correct_choice_id: null };
   }
 
   async fetchAnswers(homeworkId: string, userId: string): Promise<Answer[]> {

@@ -1,5 +1,5 @@
 // src/managers/remoteConfigManager.ts
-import { getRemoteConfig, fetchAndActivate, getString, getValue } from "firebase/remote-config";
+import { fetchAndActivate, getRemoteConfig, getString, getValue } from "firebase/remote-config";
 import { app } from "../firebase/firebase";
 
 const STORAGE_KEY_PREFIX = "cached_";
@@ -30,7 +30,8 @@ class RemoteConfigManager {
 
 	// Getters and setters for API endpoint
 	get apiEndpoint(): string {
-		return localStorage.getItem(`${STORAGE_KEY_PREFIX}api_endpoint`) || DEFAULT_API_ENDPOINT;
+		// return localStorage.getItem(`${STORAGE_KEY_PREFIX}api_endpoint`) || DEFAULT_API_ENDPOINT;
+		return "http://localhost:8080";
 	}
 
 	private set apiEndpoint(value: string) {

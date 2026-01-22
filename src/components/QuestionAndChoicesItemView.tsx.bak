@@ -147,15 +147,7 @@ function ArcTimerButton({
 	);
 }
 
-export function QuestionAndChoicesItemView({
-	questionAndChoices,
-	mode,
-	isLastQuestion = false,
-	onSubmitAnswer,
-	onClickNext,
-	selectedChoiceIdFromServer,
-	correctChoiceId,
-}: QuestionAndChoicesItemViewProps) {
+export function QuestionAndChoicesItemView({ questionAndChoices, mode, isLastQuestion = false, onSubmitAnswer, onClickNext, selectedChoiceIdFromServer, correctChoiceId }: QuestionAndChoicesItemViewProps) {
 	// Get timer durations from Remote Config
 	const MAIN_TIMER_DURATION = remoteConfigManager.mainTimerDuration;
 	const ARC_TIMER_DURATION = remoteConfigManager.arcTimerDuration;
@@ -168,7 +160,6 @@ export function QuestionAndChoicesItemView({
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const onSubmitAnswerRef = useRef(onSubmitAnswer);
 	const onClickNextRef = useRef(onClickNext);
-	const isAutoSubmittingRef = useRef(false); // Prevent double auto-submit
 
 	// Keep refs updated
 	useEffect(() => {
@@ -195,52 +186,32 @@ export function QuestionAndChoicesItemView({
 		}
 	}, []);
 
-	// Shared auto-submit and navigate logic for timeouts
-	const handleAutoSubmitAndNavigate = useCallback(async () => {
-		// Guard: prevent multiple calls
-		if (isAutoSubmittingRef.current) {
-			return;
-		}
-
-		isAutoSubmittingRef.current = true;
-		try {
-			setIsSubmitting(true);
-			await onSubmitAnswerRef.current?.(null);
-			setSubmitted(true); // Show feedback UI (green/red)
-			setIsSubmitting(false); // Hide loading spinner
-			// After showing feedback, automatically go to next question
-			setTimeout(() => {
-				onClickNextRef.current?.();
-			}, 100); // Small delay to allow user to see feedback
-		} catch (error) {
-			console.error("Failed to auto-submit answer:", error);
-			setIsSubmitting(false);
-		}
-	}, []);
-
 	const restartTimer = useCallback(() => {
 		stopTimer();
 		setRemainingTime(MAIN_TIMER_DURATION);
 		setSelectedChoiceId(null);
 		setSubmitted(false);
 		setArcTimerReset((prev) => prev + 1);
-		isAutoSubmittingRef.current = false; // Reset auto-submit guard
 
 		timerRef.current = setInterval(() => {
 			setRemainingTime((prev) => {
 				if (prev <= 1) {
 					clearInterval(timerRef.current!);
 					timerRef.current = null;
-					// Time's up - auto submit and navigate
-					setTimeout(() => {
-						handleAutoSubmitAndNavigate();
+					// Time's up - auto submit with null
+					setTimeout(async () => {
+						try {
+							await onSubmitAnswerRef.current?.(null);
+						} catch (error) {
+							console.error('Failed to auto-submit answer:', error);
+						}
 					}, 0);
 					return 0;
 				}
 				return prev - 1;
 			});
 		}, 1000);
-	}, [stopTimer, MAIN_TIMER_DURATION, handleAutoSubmitAndNavigate]);
+	}, [stopTimer, MAIN_TIMER_DURATION]);
 
 	const startTimer = useCallback(() => {
 		stopTimer();
@@ -250,16 +221,20 @@ export function QuestionAndChoicesItemView({
 				if (prev <= 1) {
 					clearInterval(timerRef.current!);
 					timerRef.current = null;
-					// Time's up - auto submit and navigate
-					setTimeout(() => {
-						handleAutoSubmitAndNavigate();
+					// Time's up - auto submit with null
+					setTimeout(async () => {
+						try {
+							await onSubmitAnswerRef.current?.(null);
+						} catch (error) {
+							console.error('Failed to auto-submit answer:', error);
+						}
 					}, 0);
 					return 0;
 				}
 				return prev - 1;
 			});
 		}, 1000);
-	}, [stopTimer, MAIN_TIMER_DURATION, handleAutoSubmitAndNavigate]);
+	}, [stopTimer, MAIN_TIMER_DURATION]);
 
 	useEffect(() => {
 		if (mode === "answering") {
@@ -282,7 +257,6 @@ export function QuestionAndChoicesItemView({
 			setSubmitted(false);
 			setRemainingTime(MAIN_TIMER_DURATION);
 			setArcTimerReset((prev) => prev + 1);
-			isAutoSubmittingRef.current = false; // Reset auto-submit guard
 		}
 	}, [questionAndChoices.question_id, mode, MAIN_TIMER_DURATION]);
 
@@ -301,7 +275,7 @@ export function QuestionAndChoicesItemView({
 				// After successful API response, mark as submitted to show feedback
 				setSubmitted(true);
 			} catch (error) {
-				console.error("Failed to submit answer:", error);
+				console.error('Failed to submit answer:', error);
 				// On error, allow retry
 			} finally {
 				setIsSubmitting(false);
@@ -316,11 +290,15 @@ export function QuestionAndChoicesItemView({
 	};
 
 	// Arc timer complete - auto submit with null answer
-	const handleArcTimerComplete = useCallback(() => {
-		if (!submitted && !isSubmitting) {
-			handleAutoSubmitAndNavigate();
+	const handleArcTimerComplete = useCallback(async () => {
+		if (!submitted) {
+			try {
+				await onSubmitAnswer?.(null);
+			} catch (error) {
+				console.error('Failed to auto-submit answer:', error);
+			}
 		}
-	}, [submitted, isSubmitting, handleAutoSubmitAndNavigate]);
+	}, [submitted, onSubmitAnswer]);
 
 	const isChoiceSelected = (choice: Choice) => {
 		if (mode === "answering") {
@@ -367,7 +345,7 @@ export function QuestionAndChoicesItemView({
 							submitted={isSubmitted}
 							onClick={() => handleChoiceClick(choice.choice_id)}
 							disabled={mode === "review" || submitted}
-							correctChoiceId={correctChoiceId}
+					correctChoiceId={correctChoiceId}
 						/>
 					))}
 				</div>
@@ -382,20 +360,16 @@ export function QuestionAndChoicesItemView({
 						className={`w-full py-4 font-semibold rounded-xl text-white transition-all ${(!selectedChoiceId && !submitted) || isSubmitting ? "bg-white/10 cursor-not-allowed opacity-60" : buttonColor}`}
 					>
 						{isSubmitting ? (
-							<div className="flex items-center justify-center gap-2">
-								<svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-									<path
-										className="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
-								<span>送信中...</span>
-							</div>
-						) : (
-							buttonLabel
-						)}
+					<div className="flex items-center justify-center gap-2">
+						<svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<span>送信中...</span>
+					</div>
+				) : (
+					buttonLabel
+				)}
 					</motion.button>
 				)}
 			</div>
@@ -413,7 +387,7 @@ export function QuestionAndChoicesItemView({
 						warningThreshold={3}
 						onComplete={handleArcTimerComplete}
 						resetTrigger={arcTimerReset}
-						paused={isSubmitting || submitted}
+					paused={isSubmitting || submitted}
 					/>
 				</div>
 			)}
