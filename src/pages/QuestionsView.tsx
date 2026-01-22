@@ -231,8 +231,14 @@ export function QuestionsView({ user }: QuestionsViewProps) {
 									questionAndChoices={currentQuestion}
 									mode={mode}
 									isLastQuestion={isLastQuestion}
-									onSubmitAnswer={handleSubmitAnswer}
-									onClickNext={handleNext}
+									onSubmitAnswer={
+										// Timers stop immediately when this is called (via isSubmitting state in child)
+										handleSubmitAnswer
+									}
+									onClickNext={
+										handleNext
+										// Timers restart automatically when question changes (via useEffect in child)
+									}
 									correctChoiceId={correctChoiceId}
 								/>
 							</motion.div>
