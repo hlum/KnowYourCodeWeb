@@ -30,8 +30,7 @@ class RemoteConfigManager {
 
 	// Getters and setters for API endpoint
 	get apiEndpoint(): string {
-		// return localStorage.getItem(`${STORAGE_KEY_PREFIX}api_endpoint`) || DEFAULT_API_ENDPOINT;
-		return "http://localhost:8080";
+		return localStorage.getItem(`${STORAGE_KEY_PREFIX}api_endpoint`) || DEFAULT_API_ENDPOINT;
 	}
 
 	private set apiEndpoint(value: string) {
