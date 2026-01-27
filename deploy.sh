@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Deploy script for KnowYourCodeWeb
-# This script checks dependencies, sets up Firebase config, and deploys with Docker
+# KnowYourCodeWeb デプロイスクリプト
+# 依存関係のチェック、Firebase設定、Dockerでのデプロイを行います
 
-set -e  # Exit immediately if a command fails
+set -e  # コマンドが失敗した場合は即座に終了
 
 IMAGE_NAME="knowyourcodeweb"
 CONTAINER_NAME="knowyourcodewebcontainer"
@@ -13,7 +13,7 @@ FIREBASE_DIR="src/firebase"
 FIREBASE_FILE="$FIREBASE_DIR/firebase.ts"
 FIREBASE_EXAMPLE="$FIREBASE_DIR/firebase.ts.example"
 
-# Colors for output
+# 出力用の色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -44,7 +44,7 @@ print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
-# Detect OS
+# OSを検出
 detect_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [ -f /etc/debian_version ]; then
@@ -61,236 +61,236 @@ detect_os() {
     fi
 }
 
-# Check if a command exists
+# コマンドが存在するか確認
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Install Docker based on OS
+# OSに応じてDockerをインストール
 install_docker() {
     local os=$(detect_os)
 
-    print_header "Installing Docker"
+    print_header "Dockerのインストール"
 
     case $os in
         debian)
-            print_info "Detected Debian/Ubuntu system"
-            echo "Running the following commands:"
+            print_info "Debian/Ubuntuシステムを検出しました"
+            echo "以下のコマンドを実行します:"
             echo "  sudo apt-get update"
             echo "  sudo apt-get install -y docker.io"
             echo "  sudo systemctl start docker"
             echo "  sudo systemctl enable docker"
             echo "  sudo usermod -aG docker \$USER"
             echo ""
-            read -p "Proceed with Docker installation? (y/n): " confirm
+            read -p "Dockerのインストールを続行しますか？ (y/n): " confirm
             if [[ $confirm == [yY] ]]; then
                 sudo apt-get update
                 sudo apt-get install -y docker.io
                 sudo systemctl start docker
                 sudo systemctl enable docker
                 sudo usermod -aG docker $USER
-                print_success "Docker installed successfully"
-                print_warning "You may need to log out and back in for group changes to take effect"
-                print_warning "Or run: newgrp docker"
+                print_success "Dockerのインストールが完了しました"
+                print_warning "グループの変更を反映するには、ログアウトして再度ログインする必要があります"
+                print_warning "または次のコマンドを実行: newgrp docker"
             else
-                print_error "Docker installation cancelled"
+                print_error "Dockerのインストールがキャンセルされました"
                 exit 1
             fi
             ;;
         redhat)
-            print_info "Detected RHEL/CentOS/Fedora system"
-            echo "Running the following commands:"
+            print_info "RHEL/CentOS/Fedoraシステムを検出しました"
+            echo "以下のコマンドを実行します:"
             echo "  sudo yum install -y docker"
             echo "  sudo systemctl start docker"
             echo "  sudo systemctl enable docker"
             echo "  sudo usermod -aG docker \$USER"
             echo ""
-            read -p "Proceed with Docker installation? (y/n): " confirm
+            read -p "Dockerのインストールを続行しますか？ (y/n): " confirm
             if [[ $confirm == [yY] ]]; then
                 sudo yum install -y docker
                 sudo systemctl start docker
                 sudo systemctl enable docker
                 sudo usermod -aG docker $USER
-                print_success "Docker installed successfully"
-                print_warning "You may need to log out and back in for group changes to take effect"
+                print_success "Dockerのインストールが完了しました"
+                print_warning "グループの変更を反映するには、ログアウトして再度ログインする必要があります"
             else
-                print_error "Docker installation cancelled"
+                print_error "Dockerのインストールがキャンセルされました"
                 exit 1
             fi
             ;;
         macos)
-            print_info "Detected macOS"
+            print_info "macOSを検出しました"
             if command_exists brew; then
-                echo "Running: brew install --cask docker"
-                read -p "Proceed with Docker installation via Homebrew? (y/n): " confirm
+                echo "実行するコマンド: brew install --cask docker"
+                read -p "HomebrewでDockerをインストールしますか？ (y/n): " confirm
                 if [[ $confirm == [yY] ]]; then
                     brew install --cask docker
-                    print_success "Docker installed successfully"
-                    print_warning "Please open Docker Desktop to complete setup"
+                    print_success "Dockerのインストールが完了しました"
+                    print_warning "セットアップを完了するにはDocker Desktopを開いてください"
                 else
-                    print_error "Docker installation cancelled"
+                    print_error "Dockerのインストールがキャンセルされました"
                     exit 1
                 fi
             else
-                print_error "Homebrew not found. Please install Docker Desktop manually:"
+                print_error "Homebrewが見つかりません。Docker Desktopを手動でインストールしてください:"
                 echo "  https://www.docker.com/products/docker-desktop/"
                 exit 1
             fi
             ;;
         *)
-            print_error "Unknown OS. Please install Docker manually:"
+            print_error "不明なOSです。Dockerを手動でインストールしてください:"
             echo "  https://docs.docker.com/get-docker/"
             exit 1
             ;;
     esac
 }
 
-# Check and install dependencies
+# 依存関係のチェックとインストール
 check_dependencies() {
-    print_header "Checking Dependencies"
+    print_header "依存関係のチェック"
 
     local missing_deps=0
 
-    # Check Git
+    # Gitのチェック
     if command_exists git; then
-        print_success "Git is installed ($(git --version | head -1))"
+        print_success "Gitがインストールされています ($(git --version | head -1))"
     else
-        print_error "Git is not installed"
+        print_error "Gitがインストールされていません"
         missing_deps=1
     fi
 
-    # Check Docker
+    # Dockerのチェック
     if command_exists docker; then
-        print_success "Docker is installed ($(docker --version))"
+        print_success "Dockerがインストールされています ($(docker --version))"
 
-        # Check if Docker daemon is running
+        # Dockerデーモンが起動しているか確認
         if docker info >/dev/null 2>&1; then
-            print_success "Docker daemon is running"
+            print_success "Dockerデーモンが起動しています"
         else
-            print_warning "Docker daemon is not running"
-            print_info "Attempting to start Docker..."
+            print_warning "Dockerデーモンが起動していません"
+            print_info "Dockerの起動を試みます..."
 
             local os=$(detect_os)
             if [[ $os == "macos" ]]; then
-                print_info "Please start Docker Desktop manually"
+                print_info "Docker Desktopを手動で起動してください"
                 exit 1
             else
                 sudo systemctl start docker 2>/dev/null || {
-                    print_error "Could not start Docker daemon"
-                    print_info "Try: sudo systemctl start docker"
+                    print_error "Dockerデーモンを起動できませんでした"
+                    print_info "次のコマンドを試してください: sudo systemctl start docker"
                     exit 1
                 }
-                print_success "Docker daemon started"
+                print_success "Dockerデーモンが起動しました"
             fi
         fi
     else
-        print_warning "Docker is not installed"
-        read -p "Would you like to install Docker now? (y/n): " install_confirm
+        print_warning "Dockerがインストールされていません"
+        read -p "今すぐDockerをインストールしますか？ (y/n): " install_confirm
         if [[ $install_confirm == [yY] ]]; then
             install_docker
         else
-            print_error "Docker is required for deployment"
+            print_error "デプロイにはDockerが必要です"
             exit 1
         fi
     fi
 
     if [ $missing_deps -eq 1 ]; then
-        print_error "Please install missing dependencies and try again"
+        print_error "不足している依存関係をインストールしてから再度実行してください"
         exit 1
     fi
 }
 
-# Check and setup Firebase configuration
+# Firebase設定のチェックとセットアップ
 check_firebase_config() {
-    print_header "Checking Firebase Configuration"
+    print_header "Firebase設定のチェック"
 
-    # Create firebase directory if it doesn't exist
+    # firebaseディレクトリが存在しない場合は作成
     if [ ! -d "$FIREBASE_DIR" ]; then
-        print_info "Creating $FIREBASE_DIR directory..."
+        print_info "$FIREBASE_DIR ディレクトリを作成しています..."
         mkdir -p "$FIREBASE_DIR"
     fi
 
-    # Check if firebase.ts exists
+    # firebase.tsが存在するか確認
     if [ -f "$FIREBASE_FILE" ]; then
-        # Check if it still contains placeholder values
+        # プレースホルダーの値が残っているか確認
         if grep -q "YOUR_API_KEY" "$FIREBASE_FILE"; then
-            print_error "Firebase configuration contains placeholder values"
-            print_info "Please edit $FIREBASE_FILE and replace the placeholder values with your Firebase credentials"
+            print_error "Firebase設定にプレースホルダーの値が含まれています"
+            print_info "$FIREBASE_FILE を編集して、プレースホルダーをFirebaseの認証情報に置き換えてください"
             echo ""
-            echo "You can find your Firebase credentials at:"
-            echo "  1. Go to https://console.firebase.google.com/"
-            echo "  2. Select your project"
-            echo "  3. Click on Project Settings (gear icon)"
-            echo "  4. Scroll down to 'Your apps' section"
-            echo "  5. Copy the firebaseConfig values"
+            echo "Firebaseの認証情報は以下の手順で取得できます:"
+            echo "  1. https://console.firebase.google.com/ にアクセス"
+            echo "  2. プロジェクトを選択"
+            echo "  3. プロジェクト設定（歯車アイコン）をクリック"
+            echo "  4. 「マイアプリ」セクションまでスクロール"
+            echo "  5. firebaseConfigの値をコピー"
             exit 1
         else
-            print_success "Firebase configuration found"
+            print_success "Firebase設定が見つかりました"
         fi
     else
-        # Check if example file exists
+        # テンプレートファイルが存在するか確認
         if [ -f "$FIREBASE_EXAMPLE" ]; then
-            print_warning "Firebase configuration not found"
-            print_info "Creating $FIREBASE_FILE from template..."
+            print_warning "Firebase設定ファイルが見つかりません"
+            print_info "テンプレートから $FIREBASE_FILE を作成しています..."
             cp "$FIREBASE_EXAMPLE" "$FIREBASE_FILE"
 
             echo ""
-            print_error "Please configure Firebase before deploying!"
+            print_error "デプロイ前にFirebaseを設定してください！"
             echo ""
-            echo "Steps to configure:"
-            echo "  1. Edit the file: $FIREBASE_FILE"
-            echo "  2. Replace the placeholder values with your Firebase credentials"
+            echo "設定手順:"
+            echo "  1. ファイルを編集: $FIREBASE_FILE"
+            echo "  2. プレースホルダーをFirebaseの認証情報に置き換える"
             echo ""
-            echo "You can find your Firebase credentials at:"
-            echo "  1. Go to https://console.firebase.google.com/"
-            echo "  2. Select your project (or create a new one)"
-            echo "  3. Click on Project Settings (gear icon)"
-            echo "  4. Scroll down to 'Your apps' section"
-            echo "  5. If no web app exists, click 'Add app' and select Web (</>)"
-            echo "  6. Copy the firebaseConfig values into $FIREBASE_FILE"
+            echo "Firebaseの認証情報は以下の手順で取得できます:"
+            echo "  1. https://console.firebase.google.com/ にアクセス"
+            echo "  2. プロジェクトを選択（または新規作成）"
+            echo "  3. プロジェクト設定（歯車アイコン）をクリック"
+            echo "  4. 「マイアプリ」セクションまでスクロール"
+            echo "  5. Webアプリがない場合は「アプリを追加」→ Web（</>）を選択"
+            echo "  6. firebaseConfigの値を $FIREBASE_FILE にコピー"
             echo ""
-            echo "Required values:"
+            echo "必要な値:"
             echo "  - apiKey"
             echo "  - authDomain"
             echo "  - projectId"
             echo "  - storageBucket"
             echo "  - messagingSenderId"
             echo "  - appId"
-            echo "  - measurementId (optional, for analytics)"
+            echo "  - measurementId（アナリティクス用、オプション）"
             echo ""
-            print_info "After configuring, run this script again."
+            print_info "設定完了後、このスクリプトを再度実行してください。"
             exit 1
         else
-            print_error "Firebase template file not found: $FIREBASE_EXAMPLE"
-            print_info "Please create $FIREBASE_FILE manually with your Firebase configuration"
+            print_error "Firebaseテンプレートファイルが見つかりません: $FIREBASE_EXAMPLE"
+            print_info "Firebase設定ファイル $FIREBASE_FILE を手動で作成してください"
             exit 1
         fi
     fi
 }
 
-# Main deployment process
+# メインのデプロイ処理
 deploy() {
-    print_header "Starting Deployment"
+    print_header "デプロイ開始"
 
-    echo "📥 Pulling latest code..."
+    echo "📥 最新のコードを取得中..."
     git pull
 
     echo ""
-    echo "🛑 Stopping container (if running)..."
+    echo "🛑 コンテナを停止中（起動している場合）..."
     docker stop $CONTAINER_NAME 2>/dev/null || true
 
-    echo "🗑  Removing container (if exists)..."
+    echo "🗑  コンテナを削除中（存在する場合）..."
     docker rm $CONTAINER_NAME 2>/dev/null || true
 
-    echo "🗑  Removing old image (if exists)..."
+    echo "🗑  古いイメージを削除中（存在する場合）..."
     docker rmi $IMAGE_NAME:latest 2>/dev/null || true
 
     echo ""
-    echo "🔨 Building Docker image..."
+    echo "🔨 Dockerイメージをビルド中..."
     docker build --no-cache -t $IMAGE_NAME:latest .
 
     echo ""
-    echo "▶️  Running new container..."
+    echo "▶️  新しいコンテナを起動中..."
     docker run \
       --name $CONTAINER_NAME \
       -p $PORT \
@@ -299,20 +299,20 @@ deploy() {
       $IMAGE_NAME:latest
 
     echo ""
-    print_success "Deployment completed successfully!"
+    print_success "デプロイが正常に完了しました！"
     echo ""
-    print_info "Container is running on port 80"
-    print_info "View logs: docker logs -f $CONTAINER_NAME"
+    print_info "コンテナはポート80で起動しています"
+    print_info "ログを確認: docker logs -f $CONTAINER_NAME"
 }
 
-# Main execution
+# メイン実行
 main() {
-    print_header "KnowYourCodeWeb Deployment"
+    print_header "KnowYourCodeWeb デプロイ"
 
     check_dependencies
     check_firebase_config
     deploy
 }
 
-# Run main function
+# メイン関数を実行
 main
