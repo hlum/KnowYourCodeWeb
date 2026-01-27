@@ -1,19 +1,22 @@
 import { APIResponse, ErrorType } from "../types/models";
 import { LollipopError } from "./errors";
 import { auth } from "../firebase/firebase";
-
-// Configuration - set these values in your environment
-const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || "";
+import { remoteConfigManager } from "../managers/remoteConfigManager";
 
 export class ApiClient {
-	private baseUrl: string;
+	private baseUrl: string | null;
 
 	constructor(baseUrl?: string) {
-		this.baseUrl = baseUrl || API_ENDPOINT;
+		this.baseUrl = baseUrl || null;
+	}
+
+	private getBaseUrl(): string {
+		return this.baseUrl || remoteConfigManager.apiEndpoint;
 	}
 
 	private makeUrl(path: string): string {
-		const base = this.baseUrl.endsWith("/") ? this.baseUrl.slice(0, -1) : this.baseUrl;
+		const baseUrl = this.getBaseUrl();
+		const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 		return `${base}/${path}`;
 	}
 
