@@ -29,4 +29,5 @@ dist-ssr
 !.env.example
 
 src/vite-env.d.ts
-src/firebase
+src/firebase/firebase.ts
+!src/firebase/firebase.ts.example
